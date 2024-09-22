@@ -4,7 +4,7 @@ x64/
 # Ignore all Debug directories
 Debug/
 
-# Ignore all .vs directiories
+# Ignore Visual Studio files
 .vs/
 
 # Prerequisites
