@@ -1,3 +1,12 @@
+# Ignore all x64 directories
+x64/
+
+# Ignore all Debug directories
+Debug/
+
+# Ignore all .vs directiories
+.vs/
+
 # Prerequisites
 *.d
 
