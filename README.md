@@ -15,15 +15,34 @@ If you come up across this repo, and wanted features please make an issue. (I wi
 - Box
 - Health
 - Lines
-- Bone (**Coming soon**)
-- Name (**Coming soon**)
-- Weapon (**Maybe**)
+- Bone
 
 #### Utils:
 - Bhop
 
 ---
+### WorkList
+ (**Coming soon**)
+- Name
+- Team Check
 
-### Current Progress:
+(**Maybe**)
+- Weapon Icon ESP
 
+### Progress History:
+v 1.0 </br>
+
+Created overlay via GLFW (OPENGL) </br>
+Created menu interface </br>
+Added Features Box ESP, Health ESP, Lines ESP, Bhop </br>
+Iniital Commit </br>
+
+v 1.1 </br>
+
+Fixed ESP Rect calculations
+Fixed better Health Bar
+Updated Overlay size, now it doesn't overcover game window.
+Added Bone ESP (Interagted to use std::vec for faster drawing)
+
+### Current Progress
 ![Current Progress](./imgs/image.png)
