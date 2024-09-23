@@ -28,6 +28,7 @@ If you come up across this repo, and wanted features please make an issue. (I wi
 
 (**Maybe**)
 - Weapon Icon ESP
+- Aimbot *do not like doing aimbot coding stuff*
 
 ### Progress History:
 v 1.0 </br>
