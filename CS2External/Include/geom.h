@@ -1,6 +1,12 @@
 #pragma once
 #include <math.h>
 #include <string>
+#include <Windows.h>
+
+extern int width;
+extern int height;
+extern RECT rect;
+
 constexpr auto PI = 3.1415927f;
 class Vector3
 {
@@ -57,10 +63,10 @@ bool WorldToScreen(vec3 pos, vec3& screen, float matrix[16], int windowWidth, in
 bool T_WorldToScreen(vec3 pos, vec3& screen, float matrix[16], int windowWidth, int windowHeight);
 Vec3 WorldToScreen(Vec3& pos, float matrix[16], int windowWidth, int windowHeight);
 Vec3 CalcAngle(Vec3& origin, Vec3& target);
-Vec4 CalcRect(Vec3& feet, Vec3 head);
-float* Transpose(const float Matrix[16]);
+Vec4 CalcRect(Vec3& feet, Vec3& head);
 
 Vec3 DegreesToRadians(Vec3& vec);
 float DegreesToRadians(float num);
 Vec3 RadiansToDegrees(const Vec3& vec);
 float RadiansToDegrees(float num);
+void getGameRect(HWND hwnd, RECT& rect);

@@ -30,6 +30,7 @@ void Menu::ESP()
         ImGui::Checkbox("Health", &Settings::ESP::Health);
         ImGui::Checkbox("Box", &Settings::ESP::Box);
         ImGui::Checkbox("Lines", &Settings::ESP::Lines);
+		ImGui::Checkbox("Bone", &Settings::ESP::bone);
         ImGui::EndTabItem();
     }
 }

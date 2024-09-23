@@ -1,7 +1,8 @@
 #pragma once
 #include "geom.h"
 
-Vec4 CalcRect(Vec3& feet, Vec3 head) { return Vec4(head.x - (head.y - feet.y) / 4, feet.y, feet.x + (head.y - feet.y) / 4, head.y); }
+extern int width = 1920;
+extern int height = 1080;
 
 bool WorldToScreen(vec3 pos, vec3& screen, float matrix[16], int windowWidth, int windowHeight)
 {
@@ -34,6 +35,9 @@ bool T_WorldToScreen(vec3 pos, vec3& screen, float matrix[16], int windowWidth, 
 	screen.x = (windowWidth / 2.0f) * (clipCoords.x / clipCoords.w + 1.0f);
 	screen.y = (windowHeight / 2.0f) * (1.0f - clipCoords.y / clipCoords.w);
 
+    if (screen.x < 0 || screen.x > windowWidth || screen.y < 0 || screen.y > windowHeight)
+        return false;
+
 	return true;
 }   
 
@@ -55,7 +59,6 @@ Vec3 WorldToScreen(Vec3& pos, float matrix[16], int windowWidth, int windowHeigh
      vec3{ clipCoords.x / clipCoords.w, clipCoords.y / clipCoords.w, clipCoords.z / clipCoords.w };
 }
 
-// Gets angle of a ray from origin to target
 Vec3 CalcAngle(Vec3& origin, Vec3& target)
 {
     Vec3 results{ 0.0f, 0.0f, 0.0f };
@@ -69,9 +72,12 @@ Vec3 CalcAngle(Vec3& origin, Vec3& target)
     return results;
 }
 
+Vec4 CalcRect(Vec3& feet, Vec3& head)
+{ 
+    return Vec4(feet.x - (head.y - feet.y) / 4, feet.y, head.x + (head.y - feet.y) / 4, head.y); }
+
 Vec3 DegreesToRadians(Vec3& vec)
 {
-    // Wasteful, but function is never used and I trust my compiler to inline these
     return Vec3{ DegreesToRadians(vec.x), DegreesToRadians(vec.y), DegreesToRadians(vec.z) };
 }
 
@@ -106,4 +112,21 @@ Vector3 Vector3::NormalizeAngle()
 std::string Vector3::ToString()
 {
 	return std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(z);
+}
+
+void getGameRect(HWND hwnd, RECT& rect)
+{
+    RECT windowRect, clientRect;
+
+    GetWindowRect(hwnd, &windowRect);
+    GetClientRect(hwnd, &clientRect);
+
+    int borderWidth = (windowRect.right - windowRect.left - (clientRect.right - clientRect.left)) / 2;
+    int titleBarHeight = (windowRect.bottom - windowRect.top - (clientRect.bottom - clientRect.top)) - borderWidth;
+
+    width = clientRect.right - clientRect.left;
+    height = clientRect.bottom - clientRect.top;
+
+    rect.left = windowRect.left + borderWidth;
+    rect.top = windowRect.top + titleBarHeight;
 }

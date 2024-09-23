@@ -18,13 +18,6 @@ bool insert_pressed = false;
 #pragma comment(lib,"glfw3.lib")
 #pragma comment(lib,"opengl32.lib")
 
-void getGameRect()
-{
-	GetWindowRect(game, &rect);
-	width = rect.right - rect.left;
-	height = rect.bottom - rect.top;
-}
-
 void GLFWinit()
 {
 	glfwInit();
@@ -70,7 +63,7 @@ void renderLoop()
 
 		glfwSetWindowAttrib(window, GLFW_MOUSE_PASSTHROUGH, !Settings::showMenu);
 
-		getGameRect();
+		getGameRect(game,rect);
 		glfwSetWindowPos(window, rect.left, rect.top);
 		glfwSetWindowSize(window, width, height);
 		glfwPollEvents();
@@ -108,7 +101,7 @@ void GLFW_Shutdown()
 int main()
 {
 	game = FindWindowA(NULL, "Counter-Strike 2");
-	getGameRect();
+	getGameRect(game,rect);
 
 	GLFWinit();
 	window = glfwCreateWindow(width, height, "CS2External", NULL, NULL);

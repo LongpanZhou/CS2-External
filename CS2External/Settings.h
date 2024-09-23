@@ -1,8 +1,6 @@
 #pragma once
 
 class ImColor;
-extern int width;
-extern int height;
 
 namespace Settings
 {
@@ -17,5 +15,6 @@ namespace Settings
 		extern bool Health;
 		extern bool Box;
 		extern bool Lines;
+		extern bool bone;
 	}
 }

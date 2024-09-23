@@ -15,5 +15,12 @@ namespace Offsets
 		constexpr unsigned int Position = 0xD58;
 		constexpr unsigned int ViewAngle = 0x119c;
 		constexpr unsigned int HeadPosition = 0x12D4;
+		constexpr unsigned int m_GameSceneNode = 0x308;
+	}
+
+	namespace GameSceneNode
+	{
+		constexpr unsigned int boneMatrix = 0x1F0;
+		constexpr unsigned int m_vecOrigin = 0x88;
 	}
 }
