@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <chrono>
 #include <thread>
+#include <iostream>
 #include <GLFW/glfw3.h>
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_impl_glfw.h>
@@ -100,13 +101,16 @@ void GLFW_Shutdown()
 
 int main()
 {
+	std::cout << "Insert: Toggle Menu" << std::endl;
+	std::cout << "Delete: Exit" << std::endl;
+
 	game = FindWindowA(NULL, "Counter-Strike 2");
 	getGameRect(game,rect);
 
 	GLFWinit();
 	window = glfwCreateWindow(width, height, "CS2External", NULL, NULL);
 	glfwMakeContextCurrent(window);
-	GLFW_ImGuiInit();
+	GLFW_ImGuiInit();	
 
 	renderLoop();
 

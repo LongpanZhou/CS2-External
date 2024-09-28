@@ -54,6 +54,9 @@
     <ClCompile Include="Hack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="weapon.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\GLFW\glfw3.h">

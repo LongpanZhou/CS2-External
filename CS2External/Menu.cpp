@@ -27,10 +27,15 @@ void Menu::ESP()
     if (ImGui::BeginTabItem("ESP"))
     {
         ImGui::Checkbox("ESP", &Settings::ESP::ESP);
+		ImGui::Checkbox("Team", &Settings::ESP::Team);
+		ImGui::Checkbox("Name", &Settings::ESP::Name);
+		ImGui::Checkbox("Weapon", &Settings::ESP::Weapon);
         ImGui::Checkbox("Health", &Settings::ESP::Health);
         ImGui::Checkbox("Box", &Settings::ESP::Box);
         ImGui::Checkbox("Lines", &Settings::ESP::Lines);
 		ImGui::Checkbox("Bone", &Settings::ESP::bone);
+		ImGui::Checkbox("Location", &Settings::ESP::Location);
+		ImGui::Checkbox("Vision Projection", &Settings::ESP::VisionProjection);
         ImGui::EndTabItem();
     }
 }

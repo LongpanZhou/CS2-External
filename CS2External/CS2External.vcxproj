@@ -149,6 +149,7 @@
     <ClCompile Include="Mem.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="weapon.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bone.h" />
