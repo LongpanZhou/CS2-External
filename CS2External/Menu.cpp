@@ -3,7 +3,6 @@
 #include <ImGui/imgui.h>
 #include <GLFW/glfw3.h>
 
-
 void Menu::ToggleMenu()
 {
 	Settings::showMenu = !Settings::showMenu;

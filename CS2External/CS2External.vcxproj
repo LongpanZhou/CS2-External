@@ -171,6 +171,11 @@
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="Settings.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="csgo_icons.ttf" />
+    <Font Include="csgo_icons_outline.ttf" />
+    <Font Include="weaponIcons.ttf" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

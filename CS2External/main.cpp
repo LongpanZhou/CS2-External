@@ -10,6 +10,7 @@
 #include "Menu.h"
 #include "Settings.h"
 #include "Hack.h"
+#include <filesystem>
 
 RECT rect;
 HWND game;
@@ -36,6 +37,10 @@ void GLFW_ImGuiInit()
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	
+	io.Fonts->AddFontDefault();
+	io.Fonts->AddFontFromFileTTF("weaponIcons.ttf", 16.0f);
+
 	ImGui::StyleColorsDark();
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -80,8 +85,6 @@ void renderLoop()
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 	}
 }
 

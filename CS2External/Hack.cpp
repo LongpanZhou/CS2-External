@@ -36,9 +36,9 @@ void Hack::ESP::ESP()
 		float LocalViewMatrix[16];
 		mem.ReadMemory(baseAddress + Offsets::ViewMatrix, LocalViewMatrix, 16);
 
-		for (int i = 1; i < numPlayers; i++)
+		for (int i = 1; i < numPlayers*2; i++)
 		{
-			uintptr_t entity = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwEntityList + i * 0x10);
+			uintptr_t entity = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwEntityList + i * 0x8);
 			if (!entity)
 				continue;
 			
@@ -69,7 +69,7 @@ void Hack::ESP::ESP()
 
 			Vec4 ESPrect = CalcRect(wtsFeet, wtsHead);
 			if (Settings::ESP::Box)
-				ImGui::GetForegroundDrawList()->AddRect({ ESPrect.x,ESPrect.y }, { ESPrect.z, ESPrect.w }, ImColor(255, 255, 255));
+				ImGui::GetForegroundDrawList()->AddRectFilled({ ESPrect.x,ESPrect.y }, { ESPrect.z, ESPrect.w }, ImColor(0, 0, 0, 32));
 
 			//if (Settings::ESP::Name)
 			//{
@@ -163,18 +163,31 @@ void Hack::ESP::ESP()
 
 				if (Settings::ESP::Weapon)
 				{
-					uintptr_t list_entry = mem.ReadMemory<uintptr_t>(EntityList + (8 * (i & 0x7FFF) >> 9) + 16);
-					if (!list_entry)
-						continue;
-
-					uint32_t playerPawn = mem.ReadMemory<uint32_t>(entity + Offsets::CSPlayerController::m_hPlayerPawn);
-					uintptr_t list_entry2 = mem.ReadMemory<uintptr_t>(EntityList + 8 * ((playerPawn & 0x7FFF) >> 9) + 0x10);
-					uintptr_t pCSPlayerPawn = mem.ReadMemory<uintptr_t>(list_entry2 + 120 * (playerPawn & 0x1FF));
-
-					uintptr_t pClippingWeapon = mem.ReadMemory<uintptr_t>(pCSPlayerPawn + Offsets::BasePlayerPawn::m_pClippingWeapon);
+					uintptr_t pClippingWeapon = mem.ReadMemory<uintptr_t>(entity + Offsets::BasePlayerPawn::m_pClippingWeapon);
 					short weaponIndex = mem.ReadMemory<short>(pClippingWeapon + Offsets::AttributeContainer::m_Item + Offsets::EconItemView::m_iItemDefinitionIndex + Offsets::BasePlayerPawn::m_AttributeManager);
 
-					ImGui::GetForegroundDrawList()->AddText({ ESPrect.z, ESPrect.w }, ImColor(255, 255, 255), Weapon[weaponIndex].c_str());
+					if (ESPrect.x - ESPrect.z > 50)
+					{
+						ImGuiIO& io = ImGui::GetIO();
+						ImFont* weapon_font = io.Fonts->Fonts[1];
+						ImGui::PushFont(weapon_font);
+
+						auto it = gunIcons.find(weaponIndex);
+
+						if (it != gunIcons.end()) {
+							std::string iconText = it->second;
+							ImGui::GetForegroundDrawList()->AddText(
+								ImVec2(ESPrect.z, ESPrect.w),
+								ImColor(255, 255, 255),
+								iconText.c_str()
+							);
+						}
+						ImGui::PopFont();
+					}
+					else
+					{
+						ImGui::GetForegroundDrawList()->AddText({ ESPrect.z, ESPrect.w }, ImColor(255, 255, 255), Weapon[weaponIndex].c_str());
+					}
 				}
 			}
 		}

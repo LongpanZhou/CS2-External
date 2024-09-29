@@ -114,4 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="csgo_icons.ttf" />
+    <Font Include="csgo_icons_outline.ttf" />
+    <Font Include="weaponIcons.ttf" />
+  </ItemGroup>
 </Project>
