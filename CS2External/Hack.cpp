@@ -169,6 +169,7 @@ void Hack::ESP::ESP()
 					if (ESPrect.x - ESPrect.z > 50)
 					{
 						ImGuiIO& io = ImGui::GetIO();
+
 						ImFont* weapon_font = io.Fonts->Fonts[1];
 						ImGui::PushFont(weapon_font);
 

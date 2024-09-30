@@ -27,9 +27,6 @@
     <ClCompile Include="Include\ImGui\imgui_draw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Include\ImGui\imgui_impl_glfw.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Include\ImGui\imgui_tables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -37,9 +34,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Include\ImGui\imgui_impl_opengl3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Include\geom.cpp">
@@ -57,21 +51,18 @@
     <ClCompile Include="weapon.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Include\ImGui\imgui_impl_dx11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\ImGui\imgui_impl_win32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\GLFW\glfw3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\GLFW\glfw3native.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\ImGui\imconfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\ImGui\imgui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\ImGui\imgui_impl_glfw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\ImGui\imgui_internal.h">
@@ -88,12 +79,6 @@
     </ClInclude>
     <ClInclude Include="Mem.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\ImGui\imgui_impl_opengl3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\ImGui\imgui_impl_opengl3_loader.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\geom.h">
       <Filter>Header Files</Filter>
@@ -113,10 +98,20 @@
     <ClInclude Include="bone.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Discord\Discord.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Discord\ImGui_setup.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ImGui\imgui_impl_dx11.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ImGui\imgui_impl_win32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Font Include="csgo_icons.ttf" />
-    <Font Include="csgo_icons_outline.ttf" />
     <Font Include="weaponIcons.ttf" />
   </ItemGroup>
 </Project>

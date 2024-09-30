@@ -1,7 +1,6 @@
 #include "Menu.h"
 #include "Settings.h"
 #include <ImGui/imgui.h>
-#include <GLFW/glfw3.h>
 
 void Menu::ToggleMenu()
 {

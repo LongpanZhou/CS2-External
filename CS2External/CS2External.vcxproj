@@ -141,8 +141,8 @@
     <ClCompile Include="Include\ImGui\imgui.cpp" />
     <ClCompile Include="Include\ImGui\imgui_demo.cpp" />
     <ClCompile Include="Include\ImGui\imgui_draw.cpp" />
-    <ClCompile Include="Include\ImGui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="Include\ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="Include\ImGui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Include\ImGui\imgui_impl_win32.cpp" />
     <ClCompile Include="Include\ImGui\imgui_tables.cpp" />
     <ClCompile Include="Include\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
@@ -154,14 +154,13 @@
   <ItemGroup>
     <ClInclude Include="bone.h" />
     <ClInclude Include="Hack.h" />
+    <ClInclude Include="Include\Discord\Discord.h" />
+    <ClInclude Include="Include\Discord\ImGui_setup.hpp" />
     <ClInclude Include="Include\geom.h" />
-    <ClInclude Include="Include\GLFW\glfw3.h" />
-    <ClInclude Include="Include\GLFW\glfw3native.h" />
     <ClInclude Include="Include\ImGui\imconfig.h" />
     <ClInclude Include="Include\ImGui\imgui.h" />
-    <ClInclude Include="Include\ImGui\imgui_impl_glfw.h" />
-    <ClInclude Include="Include\ImGui\imgui_impl_opengl3.h" />
-    <ClInclude Include="Include\ImGui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="Include\ImGui\imgui_impl_dx11.h" />
+    <ClInclude Include="Include\ImGui\imgui_impl_win32.h" />
     <ClInclude Include="Include\ImGui\imgui_internal.h" />
     <ClInclude Include="Include\ImGui\imstb_rectpack.h" />
     <ClInclude Include="Include\ImGui\imstb_textedit.h" />
@@ -172,8 +171,6 @@
     <ClInclude Include="Settings.h" />
   </ItemGroup>
   <ItemGroup>
-    <Font Include="csgo_icons.ttf" />
-    <Font Include="csgo_icons_outline.ttf" />
     <Font Include="weaponIcons.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
