@@ -23,12 +23,10 @@ If you come up across this repo, and wanted features please make an issue. (I wi
 ---
 ### WorkList
  (**Coming soon**)
-- Name
-- Team Check
 
 (**Maybe**)
-- Weapon Icon ESP
 - Aimbot *do not like doing aimbot coding stuff*
+- Name ESP
 
 ### Progress History:
 v 1.0 </br>
@@ -45,5 +43,21 @@ Fixed better Health Bar
 Updated Overlay size, now it doesn't overcover game window.
 Added Bone ESP (Interagted to use std::vec for faster drawing)
 
+v 1.2 </br>
+
+Added Weapon ESP
+Smooth rendering - removed thread sleep (dk why i had that in the first place)
+
+v 1.3 </br>
+
+Added Weapon Icon ESP
+Fixed Entity List (now with padding of 0x8)
+Resturetured Project (Still bad)
+
+v1.4 </br>
+
+Changed rendering method to use discord rendering
+Removed GLFW overlay window
+
 ### Current Progress
-![Current Progress](./imgs/image.png)
+![Current Progress](./imgs/v1.3.PNG)
