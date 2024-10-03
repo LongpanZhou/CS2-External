@@ -1,4 +1,5 @@
 #include "Mem.h"
+#include <iostream>
 
 Mem::Mem(const wchar_t* processName)
 {
@@ -11,12 +12,24 @@ Mem::Mem(const wchar_t* processName)
 		return;
 
 	while (Process32Next(snapshot, &entry))
+	{
 		if (!_wcsicmp(entry.szExeFile, processName))
 		{
 			this->processID = entry.th32ProcessID;
-			this->processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processID);
+			this->processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID);
+
+			if (this->processHandle == NULL) {
+				DWORD errorCode = GetLastError();
+				std::cout << "Failed to get process handle. Error Code: " << errorCode << std::endl;
+			}
+			else {
+				std::wcout << entry.szExeFile << std::endl;
+				std::cout << "Process ID: " << processID << std::endl;
+				std::cout << "Process Handle: " << processHandle << std::endl;
+			}
 			break;
 		}
+	}
 	CloseHandle(snapshot);
 }
 

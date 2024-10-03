@@ -13,14 +13,15 @@
 auto mem = Mem(L"cs2.exe");
 auto baseAddress = mem.GetModuleAddress(L"client.dll");
 auto serverBaseAddress = mem.GetModuleAddress(L"server.dll");
-uintptr_t localPlayerPtr = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwLocalPlayer);
 uintptr_t EntityList = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwEntityList);
+uintptr_t EntityListEntry = mem.ReadMemory<uintptr_t>(EntityList + 0x10);
 
 void Hack::Util::Bhop()
 {
 	if (Settings::Util::Bhop && GetAsyncKeyState(VK_SPACE))
 	{
 		int jump_state = mem.ReadMemory<int>(baseAddress + Offsets::dwJumpState);
+
 		mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 65537);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 16777472);
@@ -29,17 +30,31 @@ void Hack::Util::Bhop()
 
 void Hack::ESP::ESP()
 {
+	uintptr_t localPlayerPtr = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwLocalPlayerPawn);
 	if (Settings::ESP::ESP)
 	{
-		int numPlayers = mem.ReadMemory<int>(serverBaseAddress + Offsets::NumOfPlayers);
-
 		float LocalViewMatrix[16];
-		mem.ReadMemory(baseAddress + Offsets::ViewMatrix, LocalViewMatrix, 16);
+		mem.ReadMemory(baseAddress + Offsets::dwViewMatrix, LocalViewMatrix, 16);
 
-		for (int i = 1; i < numPlayers*2; i++)
+		for (int i = 0; i < 64; i++)
 		{
-			uintptr_t entity = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwEntityList + i * 0x8);
-			if (!entity)
+			uintptr_t listEntityController = mem.ReadMemory<uintptr_t>(EntityList + ((8 * (i & 0x7FFF) >> 9) + 16));
+			uintptr_t entityController = mem.ReadMemory<uintptr_t>(listEntityController + (120) * (i & 0x1FF));
+
+			uintptr_t entityControllerPawn = mem.ReadMemory<uintptr_t>(entityController + Offsets::CSPlayerController::m_hPlayerPawn);
+			uintptr_t listEntity = mem.ReadMemory<uintptr_t>(EntityList + (0x8 * ((entityControllerPawn & 0x7FFF) >> 9) + 16));
+			uintptr_t entity = mem.ReadMemory<uintptr_t>(listEntity + (120) * (entityControllerPawn & 0x1FF));
+
+			//std::cout << "------------------------------------------------------" << std::endl;
+			//std::cout << "listEntityController  " << std::hex << EntityList << std::endl;
+			//std::cout << "EntityListEntry  " << std::hex << EntityListEntry << std::endl;
+			//std::cout << "Entity  " << std::hex << entity << std::endl;
+			//std::cout << "EntityController  " << std::hex << entityController << std::endl;
+			//std::cout << "EntityControllerPawn  " << std::hex << entityControllerPawn << std::endl;
+			//std::cout << "ListEntity  " << std::hex << listEntity << std::endl;
+			//std::cout << "entity  " << std::hex << entity << std::endl;
+
+			if (!entity || entity == localPlayerPtr)
 				continue;
 			
 			int entity_team = mem.ReadMemory<int>(entity + Offsets::LocalPlayer::m_iTeamNum);
@@ -48,13 +63,13 @@ void Hack::ESP::ESP()
 			if (!Settings::ESP::Team && entity_team == localplayer_team)
 				continue;
 
-			int health = mem.ReadMemory<int>(entity + Offsets::LocalPlayer::Health);
+			int health = mem.ReadMemory<int>(entity + Offsets::LocalPlayer::m_iHealth);
 
 			if (health <= 0 || health > 100)
 				continue;
 			
-			Vec3 feet = mem.ReadMemory<Vec3>(entity + Offsets::LocalPlayer::Position);
-			Vec3 head = mem.ReadMemory<Vec3>(entity + Offsets::LocalPlayer::HeadPosition);
+			Vec3 feet = mem.ReadMemory<Vec3>(entity + Offsets::LocalPlayer::m_vLastSlopeCheckPos);
+			Vec3 head = mem.ReadMemory<Vec3>(entity + Offsets::LocalPlayer::m_vecLastClipCameraPos);
 
 			bool Draw = false;
 			Vec3 wtsFeet, wtsHead;
@@ -85,6 +100,14 @@ void Hack::ESP::ESP()
 				ImGui::GetForegroundDrawList()->AddText({ ESPrect.z, ESPrect.y }, ImColor(255, 255, 255), Location);
 			}
 
+			if (Settings::ESP::Name)
+			{
+				char nameBuffer[128];
+				uintptr_t namePtr = mem.ReadMemory<uintptr_t>(entityController + Offsets::CSPlayerController::m_sSanitizedPlayerName);
+				mem.ReadMemory(namePtr, nameBuffer, 128);
+				ImGui::GetForegroundDrawList()->AddText({ ESPrect.z, ESPrect.w - 15 }, ImColor(255, 255, 255), nameBuffer);
+			}
+
 			if (Settings::ESP::Health)
 			{
 				ImVec2 start{ ESPrect.x + 5, wtsFeet.y };
@@ -101,7 +124,7 @@ void Hack::ESP::ESP()
 
 			if (Settings::ESP::bone || Settings::ESP::VisionProjection)
 			{
-				uintptr_t gamescene = mem.ReadMemory<uintptr_t>(entity + Offsets::LocalPlayer::m_GameSceneNode);
+				uintptr_t gamescene = mem.ReadMemory<uintptr_t>(entity + Offsets::LocalPlayer::m_pGameSceneNode);
 				uintptr_t boneArrayptr = mem.ReadMemory<uintptr_t>(gamescene + Offsets::GameSceneNode::boneMatrix);
 				BoneJointData boneArray[28];
 				mem.ReadMemory<BoneJointData>(boneArrayptr, boneArray, 28);
@@ -146,7 +169,7 @@ void Hack::ESP::ESP()
 
 				if (Settings::ESP::VisionProjection)
 				{
-					Vec2 Entity_ViewAngle = mem.ReadMemory<Vec2>(entity + Offsets::LocalPlayer::ViewAngle);
+					Vec2 Entity_ViewAngle = mem.ReadMemory<Vec2>(entity + Offsets::LocalPlayer::m_angEyeAngles);
 					Vec3 Vision_Start, Vision_End, Tmp;
 					T_WorldToScreen(boneArray[BONEINDEX::HEAD].Pos, Vision_Start, LocalViewMatrix, width, height);
 					

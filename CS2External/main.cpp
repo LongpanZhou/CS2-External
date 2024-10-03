@@ -20,6 +20,20 @@ bool insert_pressed = false;
 #pragma comment(lib,"glfw3.lib")
 #pragma comment(lib,"opengl32.lib")
 
+bool IsRunAsAdmin()
+{
+	BOOL isAdmin = FALSE;
+	PSID adminGroup = NULL;
+	SID_IDENTIFIER_AUTHORITY ntAuthority = SECURITY_NT_AUTHORITY;
+	if (AllocateAndInitializeSid(&ntAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID,
+		DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &adminGroup))
+	{
+		CheckTokenMembership(NULL, adminGroup, &isAdmin);
+		FreeSid(adminGroup);
+	}
+	return isAdmin;
+}
+
 void GLFWinit()
 {
 	glfwInit();
@@ -104,6 +118,12 @@ void GLFW_Shutdown()
 
 int main()
 {
+	if (!IsRunAsAdmin())
+	{
+		std::cout << "This program must be run as an administrator!" << std::endl;
+		return 1;
+	}
+
 	std::cout << "Insert: Toggle Menu" << std::endl;
 	std::cout << "Delete: Exit" << std::endl;
 
