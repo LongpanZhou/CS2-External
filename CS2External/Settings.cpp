@@ -22,4 +22,11 @@ namespace Settings
 		bool distance = true;
 		bool VisionProjection = true;
 	}
+	
+	namespace Misc
+	{
+		bool Item = true;
+		bool Glow = true;
+		bool Bomb = true;
+	}
 }

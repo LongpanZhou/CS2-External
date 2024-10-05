@@ -5,5 +5,6 @@ namespace Menu
 	void MainMenu();
 	void ToggleMenu();
 	void ESP();
+	void MISC();
 	void Utility();
 }

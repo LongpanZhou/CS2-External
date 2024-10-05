@@ -12,6 +12,18 @@ void Menu::ToggleMenu()
 	io.MouseDrawCursor = Settings::showMenu;
 }
 
+void Menu::MISC()
+{
+	if (ImGui::BeginTabItem("MISC"))
+	{
+        ImGui::Checkbox("Item", &Settings::Misc::Item);
+        ImGui::Checkbox("Glow", &Settings::Misc::Glow);
+		ImGui::Checkbox("Bomb", &Settings::Misc::Bomb);
+		ImGui::EndTabItem();
+	}
+
+}
+
 void Menu::Utility()
 {
     if (ImGui::BeginTabItem("Utility"))
@@ -49,6 +61,7 @@ void Menu::MainMenu()
         if (ImGui::BeginTabBar("Tab bar"))
         {
             ESP();
+			MISC();
             Utility();
 
             ImGui::EndTabBar();

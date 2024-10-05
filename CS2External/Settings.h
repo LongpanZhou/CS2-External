@@ -23,4 +23,11 @@ namespace Settings
 		extern bool Distance;
 		extern bool VisionProjection;
 	}
+
+	namespace Misc
+	{
+		extern bool Item;
+		extern bool Bomb;
+		extern bool Glow;
+	}
 }

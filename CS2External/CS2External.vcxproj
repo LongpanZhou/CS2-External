@@ -127,6 +127,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -169,12 +170,23 @@
     <ClInclude Include="Mem.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Offsets.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Settings.h" />
   </ItemGroup>
   <ItemGroup>
-    <Font Include="csgo_icons.ttf" />
-    <Font Include="csgo_icons_outline.ttf" />
     <Font Include="weaponIcons.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Lib\glfw3.dll" />
+    <None Include="rcdata1.bin" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Lib\glfw3.lib" />
+    <Library Include="Lib\glfw3dll.lib" />
+    <Library Include="Lib\glfw3_mt.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CS2External.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

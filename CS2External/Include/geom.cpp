@@ -73,8 +73,9 @@ Vec3 CalcAngle(Vec3& origin, Vec3& target)
 }
 
 Vec4 CalcRect(Vec3& feet, Vec3& head)
-{ 
-    return Vec4(feet.x - (head.y - feet.y) / 4, feet.y, head.x + (head.y - feet.y) / 4, head.y); }
+{
+    return Vec4{feet.x - (head.y - feet.y) / 4, feet.y, head.x + (head.y - feet.y) / 4, head.y}; 
+}
 
 Vec3 DegreesToRadians(Vec3& vec)
 {

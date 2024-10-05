@@ -20,6 +20,26 @@ bool insert_pressed = false;
 #pragma comment(lib,"glfw3.lib")
 #pragma comment(lib,"opengl32.lib")
 
+#define IDR_TTF1 101
+#define IDR_RCDATA1                     102
+
+void* LoadEmbeddedFont(HINSTANCE hInstance, int resourceId, size_t& size) {
+	HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resourceId), RT_RCDATA);
+	if (!hRes) {
+		std::cerr << "Failed to find resource." << std::endl;
+		return nullptr;
+	}
+
+	HGLOBAL hResData = LoadResource(hInstance, hRes);
+	if (!hResData) {
+		std::cerr << "Failed to load resource." << std::endl;
+		return nullptr;
+	}
+
+	size = SizeofResource(hInstance, hRes);
+	return LockResource(hResData);
+}
+
 bool IsRunAsAdmin()
 {
 	BOOL isAdmin = FALSE;
@@ -53,7 +73,10 @@ void GLFW_ImGuiInit()
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	
 	io.Fonts->AddFontDefault();
-	io.Fonts->AddFontFromFileTTF("weaponIcons.ttf", 16.0f);
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+	size_t fontSize = 0;
+	void* fontData = LoadEmbeddedFont(hInstance, IDR_RCDATA1, fontSize);
+	ImFont* font = io.Fonts->AddFontFromMemoryTTF(fontData, fontSize, 16.0f);
 
 	ImGui::StyleColorsDark();
 
@@ -121,6 +144,7 @@ int main()
 	if (!IsRunAsAdmin())
 	{
 		std::cout << "This program must be run as an administrator!" << std::endl;
+		getchar();
 		return 1;
 	}
 
@@ -139,4 +163,5 @@ int main()
 
 	GLFW_ImGuiShutdown();
 	GLFW_Shutdown();
+	getchar();
 }

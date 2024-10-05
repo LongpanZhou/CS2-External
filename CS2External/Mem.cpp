@@ -16,7 +16,7 @@ Mem::Mem(const wchar_t* processName)
 		if (!_wcsicmp(entry.szExeFile, processName))
 		{
 			this->processID = entry.th32ProcessID;
-			this->processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID);
+			this->processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, FALSE, processID);
 
 			if (this->processHandle == NULL) {
 				DWORD errorCode = GetLastError();

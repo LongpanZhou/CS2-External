@@ -4535,7 +4535,8 @@ GLFWAPI void glfwPollEvents(void);
 
 /*! @brief Waits until events are queued and processes them.
  *
- *  This function puts the calling thread to sleep until at least one event is
+ *  This function puts the calling thread to 
+ until at least one event is
  *  available in the event queue.  Once one or more events are available,
  *  it behaves exactly like @ref glfwPollEvents, i.e. the events in the queue
  *  are processed and the function then returns immediately.  Processing events

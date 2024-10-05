@@ -1,14 +1,10 @@
 #pragma once
 
+//shit namespace please ignore
 namespace Hack
 {
 	void hackloop();
-	namespace Util
-	{
-		void Bhop();
-	}
-	namespace ESP
-	{
-		void ESP();
-	}
+	void Util();
+	void ESP();
+	void Misc();
 }

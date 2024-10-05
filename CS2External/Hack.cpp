@@ -14,29 +14,40 @@ auto mem = Mem(L"cs2.exe");
 auto baseAddress = mem.GetModuleAddress(L"client.dll");
 auto serverBaseAddress = mem.GetModuleAddress(L"server.dll");
 uintptr_t EntityList = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwEntityList);
-uintptr_t EntityListEntry = mem.ReadMemory<uintptr_t>(EntityList + 0x10);
+float LocalViewMatrix[16];
 
-void Hack::Util::Bhop()
+void Hack::Util()
 {
-	if (Settings::Util::Bhop && GetAsyncKeyState(VK_SPACE))
+	if (Settings::Util::Bhop && GetAsyncKeyState(VK_SPACE) & 0x8000)
 	{
-		int jump_state = mem.ReadMemory<int>(baseAddress + Offsets::dwJumpState);
+		static bool jump = false;
+		if (!jump)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 65537);
+			jump = true;
+		}
 
-		mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 65537);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 16777472);
+		if (jump)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 256);
+			jump = false;
+
+		}
 	}
 }
 
-void Hack::ESP::ESP()
+void Hack::ESP()
 {
 	uintptr_t localPlayerPtr = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwLocalPlayerPawn);
+	int localplayer_team = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iTeamNum);
+
 	if (Settings::ESP::ESP)
 	{
-		float LocalViewMatrix[16];
 		mem.ReadMemory(baseAddress + Offsets::dwViewMatrix, LocalViewMatrix, 16);
 
-		for (int i = 0; i < 64; i++)
+		for (int i = 1; i < 64; i++)
 		{
 			uintptr_t listEntityController = mem.ReadMemory<uintptr_t>(EntityList + ((8 * (i & 0x7FFF) >> 9) + 16));
 			uintptr_t entityController = mem.ReadMemory<uintptr_t>(listEntityController + (120) * (i & 0x1FF));
@@ -45,21 +56,11 @@ void Hack::ESP::ESP()
 			uintptr_t listEntity = mem.ReadMemory<uintptr_t>(EntityList + (0x8 * ((entityControllerPawn & 0x7FFF) >> 9) + 16));
 			uintptr_t entity = mem.ReadMemory<uintptr_t>(listEntity + (120) * (entityControllerPawn & 0x1FF));
 
-			//std::cout << "------------------------------------------------------" << std::endl;
-			//std::cout << "listEntityController  " << std::hex << EntityList << std::endl;
-			//std::cout << "EntityListEntry  " << std::hex << EntityListEntry << std::endl;
-			//std::cout << "Entity  " << std::hex << entity << std::endl;
-			//std::cout << "EntityController  " << std::hex << entityController << std::endl;
-			//std::cout << "EntityControllerPawn  " << std::hex << entityControllerPawn << std::endl;
-			//std::cout << "ListEntity  " << std::hex << listEntity << std::endl;
-			//std::cout << "entity  " << std::hex << entity << std::endl;
-
 			if (!entity || entity == localPlayerPtr)
 				continue;
 			
 			int entity_team = mem.ReadMemory<int>(entity + Offsets::LocalPlayer::m_iTeamNum);
-			int localplayer_team = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iTeamNum);
-			
+
 			if (!Settings::ESP::Team && entity_team == localplayer_team)
 				continue;
 
@@ -85,13 +86,6 @@ void Hack::ESP::ESP()
 			Vec4 ESPrect = CalcRect(wtsFeet, wtsHead);
 			if (Settings::ESP::Box)
 				ImGui::GetForegroundDrawList()->AddRectFilled({ ESPrect.x,ESPrect.y }, { ESPrect.z, ESPrect.w }, ImColor(0, 0, 0, 32));
-
-			//if (Settings::ESP::Name)
-			//{
-			//	char Name[32];
-			//	mem.ReadMemory(entity + Offsets::BasePlayerController::m_iszPlayerName, Name, 32);
-			//	ImGui::GetForegroundDrawList()->AddText({ ESPrect.z, ESPrect.w }, ImColor(255, 255, 255), Name);
-			//}
 
 			if (Settings::ESP::Location)
 			{
@@ -214,11 +208,137 @@ void Hack::ESP::ESP()
 				}
 			}
 		}
+
+		//if (Settings::ESP::Item)
+		//{
+		//	for (int i = 65; i < 1024; i++)
+		//	{
+		//		uintptr_t listEntityController = mem.ReadMemory<uintptr_t>(EntityList + ((8 * (i & 0x7FFF) >> 9) + 16));
+		//		
+		//		if (!listEntityController)
+		//			continue;
+		//		uintptr_t entityController = mem.ReadMemory<uintptr_t>(listEntityController + 120 * (i & 0x1FF));
+
+		//		uintptr_t gamescene = mem.ReadMemory<uintptr_t>(entityController + Offsets::LocalPlayer::m_pGameSceneNode);
+		//		Vec3 EntityPos = mem.ReadMemory<Vec3>(gamescene + Offsets::GameSceneNode::m_vecOrigin);
+
+		//		uintptr_t itemInfo = mem.ReadMemory<uintptr_t>(gamescene + 0x10);
+		//		uintptr_t itemTypePtr = mem.ReadMemory<uintptr_t>(itemInfo + 0x20);
+
+		//		char nameBuffer[128];
+		//		mem.ReadMemory(itemTypePtr, nameBuffer, 128);
+
+		//		Vec3 ScreenPos;
+		//		if (T_WorldToScreen(EntityPos, ScreenPos, LocalViewMatrix, width, height))
+		//		{
+		//			ImGui::GetForegroundDrawList()->AddText({ ScreenPos.x, ScreenPos.y }, ImColor(255, 255, 255), nameBuffer);
+		//		}
+
+		//		//std::string Weapons;
+		//		//auto itWeapons = WeaponsType.find(nameBuffer);
+		//		//if (itWeapons != WeaponsType.end()) {
+		//		//	Weapons = itWeapons->second;
+		//		//}
+		//		//else {
+		//		//	Weapons = "Unknown";
+		//		//}
+
+		//		//std::string Projectiles;
+		//		//auto itProjectiles = ProjectilesType.find(nameBuffer);
+		//		//if (itProjectiles != ProjectilesType.end()) {
+		//		//	Projectiles = itProjectiles->second;
+		//		//}
+		//		//else {
+		//		//	Projectiles = "Unknown";
+		//		//}
+
+
+		//		//auto itEntityType = EntityType.find(nameBuffer);
+		//		//std::string Entity;
+		//		//if (itEntityType != EntityType.end()) {
+		//		//	Entity = itEntityType->second;
+		//		//}
+		//		//else {
+		//		//	Entity = "Unknown";
+		//		//}
+		//	}
+		//}
+	}
+}
+
+void Hack::Misc()
+{
+	if (Settings::Misc::Bomb)
+	{
+		uintptr_t entity = mem.ReadMemory<uintptr_t>(mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwWeaponC4));
+		uintptr_t gamescene = mem.ReadMemory<uintptr_t>(entity + Offsets::LocalPlayer::m_pGameSceneNode);
+		Vec3 EntityPos = mem.ReadMemory<Vec3>(gamescene + Offsets::GameSceneNode::m_vecAbsOrigin);
+		Vec3 ScreenPos;
+
+		ImGuiIO& io = ImGui::GetIO();
+		ImFont* weapon_font = io.Fonts->Fonts[1];
+		ImGui::PushFont(weapon_font);
+
+		if (T_WorldToScreen(EntityPos, ScreenPos, LocalViewMatrix, width, height))
+		{
+			ImGui::GetForegroundDrawList()->AddText({ ScreenPos.x, ScreenPos.y }, ImColor(255, 255, 255), "o");
+		}
+
+		entity = mem.ReadMemory<uintptr_t>(mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwPlantedC4));
+
+		gamescene = mem.ReadMemory<uintptr_t>(entity + Offsets::LocalPlayer::m_pGameSceneNode);
+		EntityPos = mem.ReadMemory<Vec3>(gamescene + Offsets::GameSceneNode::m_vecAbsOrigin);
+		if (T_WorldToScreen(EntityPos, ScreenPos, LocalViewMatrix, width, height))
+		{
+			ImGui::GetForegroundDrawList()->AddText({ ScreenPos.x, ScreenPos.y }, ImColor(255, 255, 255), "o");
+		}
+
+		ImGui::PopFont();
+	}
+
+	if (Settings::Misc::Glow)
+	{
+		uintptr_t localPlayerPtr = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwLocalPlayerPawn);
+		int localplayer_team = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iTeamNum);
+
+		for (int i = 1; i < 64; i++)
+		{
+			uintptr_t listEntityController = mem.ReadMemory<uintptr_t>(EntityList + ((8 * (i & 0x7FFF) >> 9) + 16));
+			uintptr_t entityController = mem.ReadMemory<uintptr_t>(listEntityController + (120) * (i & 0x1FF));
+
+			uintptr_t entityControllerPawn = mem.ReadMemory<uintptr_t>(entityController + Offsets::CSPlayerController::m_hPlayerPawn);
+			uintptr_t listEntity = mem.ReadMemory<uintptr_t>(EntityList + (0x8 * ((entityControllerPawn & 0x7FFF) >> 9) + 16));
+			uintptr_t entity = mem.ReadMemory<uintptr_t>(listEntity + (120) * (entityControllerPawn & 0x1FF));
+		
+			if (entity == localPlayerPtr)
+				continue;
+
+			int entity_team = mem.ReadMemory<int>(entity + Offsets::LocalPlayer::m_iTeamNum);
+			if (!Settings::ESP::Team && entity_team == localplayer_team)
+				continue;
+
+			if (entity_team != localplayer_team)
+			{
+				mem.WriteMemory<int>(entity + Offsets::C_BaseModelEntity::m_Glow + Offsets::CGlowProperty::m_bGlowing, 1);
+				mem.WriteMemory<int>(entity + Offsets::C_BaseModelEntity::m_Glow + Offsets::CGlowProperty::m_iGlowType, 3);
+				mem.WriteMemory<DWORD>(entity + Offsets::C_BaseModelEntity::m_Glow + Offsets::CGlowProperty::m_glowColorOverride, 0xFF0000FF);
+			}
+			
+			if (entity_team == localplayer_team)
+			{
+				mem.WriteMemory<int>(entity + Offsets::C_BaseModelEntity::m_Glow + Offsets::CGlowProperty::m_bGlowing, 1);
+				mem.WriteMemory<int>(entity + Offsets::C_BaseModelEntity::m_Glow + Offsets::CGlowProperty::m_iGlowType, 3);
+				mem.WriteMemory<DWORD>(entity + Offsets::C_BaseModelEntity::m_Glow + Offsets::CGlowProperty::m_glowColorOverride, 0xFFFF0000);
+			}
+		}
 	}
 }
 
 void Hack::hackloop()
 {
-	Hack::Util::Bhop();
-	Hack::ESP::ESP();
+	std::thread utilThread(Hack::Util);
+	utilThread.detach();
+
+	Hack::Misc();
+	Hack::ESP();
 }

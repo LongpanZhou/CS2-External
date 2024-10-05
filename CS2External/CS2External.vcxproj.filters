@@ -113,10 +113,27 @@
     <ClInclude Include="bone.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Font Include="csgo_icons.ttf" />
-    <Font Include="csgo_icons_outline.ttf" />
     <Font Include="weaponIcons.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Lib\glfw3.dll" />
+    <None Include="rcdata1.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Lib\glfw3.lib" />
+    <Library Include="Lib\glfw3_mt.lib" />
+    <Library Include="Lib\glfw3dll.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CS2External.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
