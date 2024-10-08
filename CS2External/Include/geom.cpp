@@ -62,13 +62,14 @@ Vec3 WorldToScreen(Vec3& pos, float matrix[16], int windowWidth, int windowHeigh
 Vec3 CalcAngle(Vec3& origin, Vec3& target)
 {
     Vec3 results{ 0.0f, 0.0f, 0.0f };
-    results.x = RadiansToDegrees(-atan2f(target.x - origin.x, target.y - origin.y));
-    if (results.x <= 0.0f)
+    results.y = RadiansToDegrees(-atan2f(target.x - origin.x, target.y - origin.y));
+    if (results.y <= 90.0f)
     {
-        results.x += 360.0f;
+        results.y += 360.0f;
     }
+	results.y -= 270.0f;
 
-    results.y = RadiansToDegrees(asinf((target.z - origin.z) / origin.Distance(target)));
+    results.x = -RadiansToDegrees(asinf((target.z - origin.z) / origin.Distance(target)));
     return results;
 }
 

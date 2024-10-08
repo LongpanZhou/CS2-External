@@ -7,4 +7,7 @@ namespace Hack
 	void Util();
 	void ESP();
 	void Misc();
+	void Aimbot();
+	extern void PatchSlient();
+	extern void UnpatchSlient();
 }

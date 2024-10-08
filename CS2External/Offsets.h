@@ -8,6 +8,7 @@ namespace Offsets
 	constexpr unsigned int dwViewMatrix = 0x1A1DDE0;
 	constexpr unsigned int dwWeaponC4 = 0x19BEDF0;
 	constexpr unsigned int dwPlantedC4 = 0x1A21F28;
+	constexpr unsigned int dwViewAngles = 0x1A27C50;
 
 	namespace LocalPlayer
 	{
@@ -19,6 +20,14 @@ namespace Offsets
 		constexpr unsigned int m_iTeamNum = 0x3E3;
 		constexpr unsigned int m_szLastPlaceName = 0x154C;
 		constexpr unsigned int m_fFlags = 0x3EC;
+		constexpr unsigned int m_iIDEntIndex = 0x1450;
+		constexpr unsigned int m_entitySpottedState = 0x23A8;
+		constexpr unsigned int m_flFlashMaxAlpha = 0x1400;
+	}
+
+	namespace EntitySpottedState_t {
+		constexpr unsigned int m_bSpotted = 0x8;
+		constexpr unsigned int m_bSpottedByMask = 0xC;
 	}
 
 	namespace GameSceneNode
@@ -63,10 +72,5 @@ namespace Offsets
 		constexpr unsigned int m_bGlowing = 0x51;
 		constexpr unsigned int m_glowColorOverride = 0x40;
 		constexpr unsigned int m_iGlowType = 0x30;
-	}
-
-	namespace EntitySpottedState_t {
-		constexpr unsigned int m_bSpotted = 0x8;
-		constexpr unsigned int m_bSpottedByMask = 0xC;
 	}
 }

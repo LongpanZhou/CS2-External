@@ -7,6 +7,8 @@ namespace Settings
 	namespace Util
 	{
 		bool Bhop = false;
+		bool Radar = false;
+		bool NoFlash = false;
 	}
 	namespace ESP
 	{
@@ -28,5 +30,36 @@ namespace Settings
 		bool Item = true;
 		bool Glow = true;
 		bool Bomb = true;
+	}
+
+	namespace Aimbot
+	{
+		const char* items[15] = {
+			"Pelvis",
+			"Neck",
+			"Head",
+			"Left Shoulder",
+			"Left Elbow",
+			"Left Hand",
+			"Right Shoulder",
+			"Right Elbow",
+			"Right Hand",
+			"Left Leg",
+			"Left Knee",
+			"Left Foot",
+			"Right Leg",
+			"Right Knee",
+			"Right Foot"
+		};
+		bool Aimbot = false;
+		bool slient = false;
+		bool Team = false;
+		bool VisibilityCheck = false;
+		bool Trigger = false;
+		int SelectedItem = 2;
+		bool distance_angle_switch = false;
+		bool FOVCheck = true;
+		float FOV = 180.0f;
+		int AimKey = 0xA0;
 	}
 }

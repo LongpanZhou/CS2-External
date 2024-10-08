@@ -3,7 +3,7 @@
 
 Mem::Mem(const wchar_t* processName)
 {
-	PROCESSENTRY32 entry;
+PROCESSENTRY32 entry;
 	entry.dwSize = sizeof(PROCESSENTRY32);
 
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
@@ -16,7 +16,7 @@ Mem::Mem(const wchar_t* processName)
 		if (!_wcsicmp(entry.szExeFile, processName))
 		{
 			this->processID = entry.th32ProcessID;
-			this->processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, FALSE, processID);
+			this->processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processID);
 
 			if (this->processHandle == NULL) {
 				DWORD errorCode = GetLastError();

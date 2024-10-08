@@ -9,43 +9,52 @@
 #include <ImGui/imgui.h>
 #include "bone.h"
 #include "weapon.hpp"
+#include <immintrin.h>
 
+//I remind you this is not the best optimized code, all the entity loop could have been put in the same loop and other etc...
 auto mem = Mem(L"cs2.exe");
 auto baseAddress = mem.GetModuleAddress(L"client.dll");
 auto serverBaseAddress = mem.GetModuleAddress(L"server.dll");
+
+vec3 aimAngle;
+uintptr_t loadViewAngleFuncYaw = baseAddress + 0x896354;
+uintptr_t loadViewAngleFuncPitch = baseAddress + 0x89636D;
+byte originalBytesYaw[10], patchedBytesYaw[10];
+byte originalBytesPitch[11], patchedBytesPitch[11];
+
 uintptr_t EntityList = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwEntityList);
 float LocalViewMatrix[16];
+uintptr_t localPlayerPtr;
+int localplayer_team;
 
 void Hack::Util()
 {
-	if (Settings::Util::Bhop && GetAsyncKeyState(VK_SPACE) & 0x8000)
+	if (Settings::Util::Bhop)
 	{
-		static bool jump = false;
-		if (!jump)
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-			mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 65537);
-			jump = true;
-		}
+		int state = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_fFlags);
 
-		if (jump)
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-			mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 256);
-			jump = false;
-
+			if (state & 1 << 0)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(2));
+				mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 65537);
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 256);
+			}
 		}
 	}
 }
 
 void Hack::ESP()
 {
-	uintptr_t localPlayerPtr = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwLocalPlayerPawn);
-	int localplayer_team = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iTeamNum);
+	//issues with flashing
+	if (Settings::Aimbot::FOVCheck && Settings::Aimbot::Aimbot)
+		ImGui::GetBackgroundDrawList()->AddCircle(ImVec2{ width / 2.0f, height / 2.0f }, Settings::Aimbot::FOV, ImColor(255, 255, 255, 128), 0.5);
 
 	if (Settings::ESP::ESP)
 	{
-		mem.ReadMemory(baseAddress + Offsets::dwViewMatrix, LocalViewMatrix, 16);
+		std::map<uintptr_t, bool> entityMap;
 
 		for (int i = 1; i < 64; i++)
 		{
@@ -56,9 +65,11 @@ void Hack::ESP()
 			uintptr_t listEntity = mem.ReadMemory<uintptr_t>(EntityList + (0x8 * ((entityControllerPawn & 0x7FFF) >> 9) + 16));
 			uintptr_t entity = mem.ReadMemory<uintptr_t>(listEntity + (120) * (entityControllerPawn & 0x1FF));
 
-			if (!entity || entity == localPlayerPtr)
+			if (!entity || entity == localPlayerPtr || entityMap.find(entity) != entityMap.end())
 				continue;
-			
+
+			entityMap[entity] = true;
+
 			int entity_team = mem.ReadMemory<int>(entity + Offsets::LocalPlayer::m_iTeamNum);
 
 			if (!Settings::ESP::Team && entity_team == localplayer_team)
@@ -206,6 +217,11 @@ void Hack::ESP()
 						ImGui::GetForegroundDrawList()->AddText({ ESPrect.z, ESPrect.w }, ImColor(255, 255, 255), Weapon[weaponIndex].c_str());
 					}
 				}
+
+				if (Settings::Util::Radar)
+				{
+					mem.WriteMemory<int>(entity + Offsets::BasePlayerPawn::m_entitySpottedState + Offsets::EntitySpottedState_t::m_bSpotted,Settings::Util::Radar);
+				}
 			}
 		}
 
@@ -268,39 +284,35 @@ void Hack::ESP()
 
 void Hack::Misc()
 {
+	if (Settings::Util::NoFlash)
+	{
+		float flashAlpha = mem.ReadMemory<float>(localPlayerPtr + Offsets::LocalPlayer::m_flFlashMaxAlpha);
+		if (flashAlpha > 0.0f)
+			mem.WriteMemory<float>(localPlayerPtr + Offsets::LocalPlayer::m_flFlashMaxAlpha, 0.0f);
+	}
+
 	if (Settings::Misc::Bomb)
 	{
 		uintptr_t entity = mem.ReadMemory<uintptr_t>(mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwWeaponC4));
 		uintptr_t gamescene = mem.ReadMemory<uintptr_t>(entity + Offsets::LocalPlayer::m_pGameSceneNode);
 		Vec3 EntityPos = mem.ReadMemory<Vec3>(gamescene + Offsets::GameSceneNode::m_vecAbsOrigin);
 		Vec3 ScreenPos;
-
-		ImGuiIO& io = ImGui::GetIO();
-		ImFont* weapon_font = io.Fonts->Fonts[1];
-		ImGui::PushFont(weapon_font);
-
-		if (T_WorldToScreen(EntityPos, ScreenPos, LocalViewMatrix, width, height))
+		if (EntityPos.x != 0 || EntityPos.y != 0 || EntityPos.z != 0)
 		{
-			ImGui::GetForegroundDrawList()->AddText({ ScreenPos.x, ScreenPos.y }, ImColor(255, 255, 255), "o");
+			ImGuiIO& io = ImGui::GetIO();
+			ImFont* weapon_font = io.Fonts->Fonts[1];
+			ImGui::PushFont(weapon_font);
+
+			if (T_WorldToScreen(EntityPos, ScreenPos, LocalViewMatrix, width, height))
+			{
+				ImGui::GetForegroundDrawList()->AddText({ ScreenPos.x, ScreenPos.y }, ImColor(255, 255, 255), "o");
+			}
+			ImGui::PopFont();
 		}
-
-		entity = mem.ReadMemory<uintptr_t>(mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwPlantedC4));
-
-		gamescene = mem.ReadMemory<uintptr_t>(entity + Offsets::LocalPlayer::m_pGameSceneNode);
-		EntityPos = mem.ReadMemory<Vec3>(gamescene + Offsets::GameSceneNode::m_vecAbsOrigin);
-		if (T_WorldToScreen(EntityPos, ScreenPos, LocalViewMatrix, width, height))
-		{
-			ImGui::GetForegroundDrawList()->AddText({ ScreenPos.x, ScreenPos.y }, ImColor(255, 255, 255), "o");
-		}
-
-		ImGui::PopFont();
 	}
 
 	if (Settings::Misc::Glow)
 	{
-		uintptr_t localPlayerPtr = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwLocalPlayerPawn);
-		int localplayer_team = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iTeamNum);
-
 		for (int i = 1; i < 64; i++)
 		{
 			uintptr_t listEntityController = mem.ReadMemory<uintptr_t>(EntityList + ((8 * (i & 0x7FFF) >> 9) + 16));
@@ -334,10 +346,197 @@ void Hack::Misc()
 	}
 }
 
+extern void Hack::PatchSlient()
+{
+	DWORD oldProtectYaw, oldProtectPitch;
+	VirtualProtect((LPVOID)loadViewAngleFuncYaw, 10, PAGE_EXECUTE_READWRITE, &oldProtectYaw);
+	VirtualProtect((LPVOID)loadViewAngleFuncPitch, 11, PAGE_EXECUTE_READWRITE, &oldProtectPitch);
+
+	// mov eax, x
+	// movd xmm0, eax
+	patchedBytesYaw[0] = 0xBA;
+	memcpy(&patchedBytesYaw[1], &aimAngle.x, sizeof(float));
+	patchedBytesYaw[5] = 0x66;
+	patchedBytesYaw[6] = 0x0F;
+	patchedBytesYaw[7] = 0x6E;
+	patchedBytesYaw[8] = 0xC2;
+	patchedBytesYaw[9] = 0x90;
+
+	// mov , y
+	// movd xmm1, eax
+	patchedBytesPitch[0] = 0xBA;
+	memcpy(&patchedBytesPitch[1], &aimAngle.y, sizeof(float));
+	patchedBytesPitch[5] = 0x66;
+	patchedBytesPitch[6] = 0x0F;
+	patchedBytesPitch[7] = 0x6E;
+	patchedBytesPitch[8] = 0xCA;
+	patchedBytesPitch[9] = 0x90;
+	patchedBytesPitch[10] = 0x90;
+
+	if (originalBytesYaw[0] == 0)
+		ReadProcessMemory(mem.GetProcessHandle(), (LPVOID)loadViewAngleFuncYaw, originalBytesYaw, sizeof(originalBytesYaw), nullptr);
+	if (originalBytesPitch[0] == 0)
+		ReadProcessMemory(mem.GetProcessHandle(), (LPVOID)loadViewAngleFuncPitch, originalBytesPitch, sizeof(originalBytesPitch), nullptr);
+
+	WriteProcessMemory(mem.GetProcessHandle(), (LPVOID)loadViewAngleFuncYaw, patchedBytesYaw, sizeof(patchedBytesYaw), nullptr);
+	WriteProcessMemory(mem.GetProcessHandle(), (LPVOID)loadViewAngleFuncPitch, patchedBytesPitch, sizeof(patchedBytesPitch), nullptr);
+
+	VirtualProtect((LPVOID)loadViewAngleFuncYaw, 10, oldProtectYaw, &oldProtectYaw);
+	VirtualProtect((LPVOID)loadViewAngleFuncPitch, 11, oldProtectPitch, &oldProtectPitch);
+};
+
+extern void Hack::UnpatchSlient()
+{
+	DWORD oldProtectYaw, oldProtectPitch;
+	VirtualProtect((LPVOID)loadViewAngleFuncYaw, 10, PAGE_EXECUTE_READWRITE, &oldProtectYaw);
+	VirtualProtect((LPVOID)loadViewAngleFuncPitch, 11, PAGE_EXECUTE_READWRITE, &oldProtectPitch);
+
+	WriteProcessMemory(mem.GetProcessHandle(), (LPVOID)loadViewAngleFuncYaw, originalBytesYaw, sizeof(originalBytesYaw), nullptr);
+	WriteProcessMemory(mem.GetProcessHandle(), (LPVOID)loadViewAngleFuncPitch, originalBytesPitch, sizeof(originalBytesPitch), nullptr);
+
+	VirtualProtect((LPVOID)loadViewAngleFuncYaw, 10, oldProtectYaw, &oldProtectYaw);
+	VirtualProtect((LPVOID)loadViewAngleFuncPitch, 11, oldProtectPitch, &oldProtectPitch);
+};
+
+void Hack::Aimbot()
+{
+	static std::map<int, int> boneindex = {
+										{ 14, 27 },
+										{ 13, 26 },
+										{ 12, 25 },
+										{ 11, 24 },
+										{ 10, 23 },
+										{ 9, 22 },
+										{ 8, 16 },
+										{ 7, 14 },
+										{ 6, 13 },
+										{ 5, 11 },
+										{ 4, 9 },
+										{ 3, 8 },
+										{ 2, 6 },
+										{ 1, 5 },
+										{ 0, 0 }
+	};
+
+	if (Settings::Aimbot::Aimbot && Settings::Aimbot::Trigger)
+	{
+		int crosshair_ent = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iIDEntIndex);
+
+		POINT p;
+		if (crosshair_ent && crosshair_ent != -1)
+		{
+			GetCursorPos(&p);
+			mouse_event(MOUSEEVENTF_LEFTDOWN, p.x, p.y, 0, 0);
+			mouse_event(MOUSEEVENTF_LEFTUP, p.x, p.y, 0, 0);
+		}
+	}
+
+	if (Settings::Aimbot::Aimbot && GetAsyncKeyState(VK_LSHIFT))
+	{
+		vec3 PlayerPos = mem.ReadMemory<vec3>(localPlayerPtr + Offsets::LocalPlayer::m_vecLastClipCameraPos);
+		vec3 viewAngles = mem.ReadMemory<vec3>(localPlayerPtr + Offsets::LocalPlayer::m_angEyeAngles);
+		uintptr_t ClosestDistanceEnemy, ClosestAngleEnemy;
+		float Closestdistance = 999999, Cloestangle = 999999;
+
+
+		for (int i = 1; i < 64; i++)
+		{
+			uintptr_t listEntityController = mem.ReadMemory<uintptr_t>(EntityList + ((8 * (i & 0x7FFF) >> 9) + 16));
+			uintptr_t entityController = mem.ReadMemory<uintptr_t>(listEntityController + (120) * (i & 0x1FF));
+
+			uintptr_t entityControllerPawn = mem.ReadMemory<uintptr_t>(entityController + Offsets::CSPlayerController::m_hPlayerPawn);
+			uintptr_t listEntity = mem.ReadMemory<uintptr_t>(EntityList + (0x8 * ((entityControllerPawn & 0x7FFF) >> 9) + 16));
+			uintptr_t entity = mem.ReadMemory<uintptr_t>(listEntity + (120) * (entityControllerPawn & 0x1FF));
+
+			if (!entity || entity == localPlayerPtr)
+				continue;
+
+			int entity_team = mem.ReadMemory<int>(entity + Offsets::LocalPlayer::m_iTeamNum);
+
+			if (!Settings::Aimbot::Team && entity_team == localplayer_team)
+				continue;
+
+			int health = mem.ReadMemory<int>(entity + Offsets::LocalPlayer::m_iHealth);
+
+			if (health <= 0 || health > 100)
+				continue;
+
+			Vec3 enemyPos = mem.ReadMemory<Vec3>(entity + Offsets::LocalPlayer::m_vecLastClipCameraPos);
+
+			if (enemyPos.x == 0 || enemyPos.y == 0 || enemyPos.z == 0)
+				continue;
+
+			if (Settings::Aimbot::VisibilityCheck)
+			{
+				int SpottedByMask = mem.ReadMemory<int>(entity + Offsets::BasePlayerPawn::m_entitySpottedState + Offsets::EntitySpottedState_t::m_bSpottedByMask);
+				if (!(SpottedByMask & (1 << localPlayerPtr)))
+					continue;
+			}
+			
+			Vec3 wtsFeet;
+			T_WorldToScreen(enemyPos, wtsFeet, LocalViewMatrix, width, height);
+			if (Settings::Aimbot::FOVCheck && abs(Vec3{ width / 2.0f,height / 2.0f, 0 }.Distance(wtsFeet) > Settings::Aimbot::FOV))
+				continue;
+
+			float distance = enemyPos.Distance(PlayerPos);
+			if (distance < Closestdistance)
+			{
+				ClosestDistanceEnemy = entity;
+				Closestdistance = distance;
+			}
+			 
+			vec3 targetAngle = CalcAngle(PlayerPos, enemyPos);
+			float xDiff = targetAngle.x - viewAngles.x;
+			if (xDiff > 180)
+				xDiff -= 360;
+			else if (xDiff < -180)
+				xDiff += 360;
+
+			float yDiff = min(abs(viewAngles.y - targetAngle.y), abs(targetAngle.y - viewAngles.y));
+
+			float angleMagnitude = sqrt(pow(xDiff, 2) + pow(yDiff, 2));
+			if (angleMagnitude < Cloestangle)
+			{
+				Cloestangle = angleMagnitude;
+				ClosestAngleEnemy = entity;
+			}
+		}
+
+		Vec3 wtsHead;
+		if (!ClosestDistanceEnemy || !ClosestAngleEnemy)
+			return;
+		
+		uintptr_t gamescene = Settings::Aimbot::distance_angle_switch ?
+							mem.ReadMemory<uintptr_t>(ClosestDistanceEnemy + Offsets::LocalPlayer::m_pGameSceneNode) :
+							mem.ReadMemory<uintptr_t>(ClosestAngleEnemy + Offsets::LocalPlayer::m_pGameSceneNode);
+
+		uintptr_t boneArrayptr = mem.ReadMemory<uintptr_t>(gamescene + Offsets::GameSceneNode::boneMatrix);
+		BoneJointData boneArray[28];
+		mem.ReadMemory<BoneJointData>(boneArrayptr, boneArray, 28);
+		vec3 enemyBonePos = boneArray[boneindex[Settings::Aimbot::SelectedItem]].Pos;
+
+		aimAngle = CalcAngle(PlayerPos, enemyBonePos);
+		if (Settings::Aimbot::slient)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			PatchSlient();
+		}
+		else
+			mem.WriteMemory<Vec3>(baseAddress + Offsets::dwViewAngles, aimAngle);
+	}
+}
+
 void Hack::hackloop()
 {
+	localPlayerPtr = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwLocalPlayerPawn);
+	localplayer_team = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iTeamNum);
+	mem.ReadMemory(baseAddress + Offsets::dwViewMatrix, LocalViewMatrix, 16);
+
 	std::thread utilThread(Hack::Util);
 	utilThread.detach();
+
+	std::thread aimbotThread(Hack::Aimbot);
+	aimbotThread.detach();
 
 	Hack::Misc();
 	Hack::ESP();

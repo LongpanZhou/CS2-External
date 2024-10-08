@@ -2,6 +2,7 @@
 #include "Settings.h"
 #include <ImGui/imgui.h>
 #include <GLFW/glfw3.h>
+#include "Hack.h"
 
 void Menu::ToggleMenu()
 {
@@ -10,6 +11,40 @@ void Menu::ToggleMenu()
 	io.WantCaptureMouse = Settings::showMenu;
 	io.WantCaptureKeyboard = Settings::showMenu;
 	io.MouseDrawCursor = Settings::showMenu;
+}
+
+void Menu::Aimbot()
+{
+    static bool distanceSelected = Settings::Aimbot::distance_angle_switch;
+    static bool angleSelected = !Settings::Aimbot::distance_angle_switch;
+	if (ImGui::BeginTabItem("Aimbot"))
+	{
+		ImGui::Checkbox("Aimbot", &Settings::Aimbot::Aimbot);
+        if (ImGui::Checkbox("Slient", &Settings::Aimbot::slient))
+        {
+            if (!Settings::Aimbot::slient)
+                Hack::UnpatchSlient();
+            else
+				Hack::PatchSlient();
+        }
+		ImGui::Checkbox("Team", &Settings::Aimbot::Team);
+		ImGui::Checkbox("Visibility Check", &Settings::Aimbot::VisibilityCheck);
+		//ImGui::Checkbox("Trigger", &Settings::Aimbot::Trigger);
+        if (ImGui::Checkbox("Closest Angle Enemy", &angleSelected))
+        {
+            Settings::Aimbot::distance_angle_switch = !angleSelected;
+            distanceSelected = !angleSelected;
+        }
+        if (ImGui::Checkbox("Closest Distance Enemy", &distanceSelected))
+        {
+            Settings::Aimbot::distance_angle_switch = distanceSelected;
+			angleSelected = !distanceSelected;
+        }
+		ImGui::Checkbox("FOV Check", &Settings::Aimbot::FOVCheck);
+		ImGui::SliderFloat("FOV", &Settings::Aimbot::FOV, 0.0f, 360.0f);
+        ImGui::ListBox("Aim Position", &Settings::Aimbot::SelectedItem, Settings::Aimbot::items, IM_ARRAYSIZE(Settings::Aimbot::items));
+      	ImGui::EndTabItem();
+	}
 }
 
 void Menu::MISC()
@@ -29,6 +64,8 @@ void Menu::Utility()
     if (ImGui::BeginTabItem("Utility"))
     {
         ImGui::Checkbox("Bhop", &Settings::Util::Bhop);
+		ImGui::Checkbox("Radar", &Settings::Util::Radar);
+		ImGui::Checkbox("NoFlash", &Settings::Util::NoFlash);
         ImGui::EndTabItem();
     }
 }
@@ -63,6 +100,7 @@ void Menu::MainMenu()
             ESP();
 			MISC();
             Utility();
+			Aimbot();
 
             ImGui::EndTabBar();
         }

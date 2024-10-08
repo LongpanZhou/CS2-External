@@ -7,4 +7,5 @@ namespace Menu
 	void ESP();
 	void MISC();
 	void Utility();
+	void Aimbot();
 }

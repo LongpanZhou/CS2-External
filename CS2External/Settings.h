@@ -8,6 +8,8 @@ namespace Settings
 	namespace Util
 	{
 		extern bool Bhop;
+		extern bool Radar;
+		extern bool NoFlash;
 	}
 	namespace ESP
 	{
@@ -29,5 +31,20 @@ namespace Settings
 		extern bool Item;
 		extern bool Bomb;
 		extern bool Glow;
+	}
+
+	namespace Aimbot
+	{
+		extern const char* items[15];
+		extern bool Aimbot;
+		extern bool slient;
+		extern bool Team;
+		extern bool VisibilityCheck;
+		extern bool Trigger;
+		extern int SelectedItem;
+		extern bool distance_angle_switch;
+		extern bool FOVCheck;
+		extern float FOV;
+		extern int AimKey;
 	}
 }
