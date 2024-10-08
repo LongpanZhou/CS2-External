@@ -36,15 +36,23 @@ If you come up across this repo, and wanted features please make an issue. (I wi
 - Item (Broken)
 - Glow
 - Bomb
-  
+
+### Aimbot
+- Aimbot
+- Slient (AMD x64 tested only)
+- Team
+- Visibility Check
+- Closest Angle Enemy
+- CloSEST Distance Enemy
+- FOV check
+- FOV range
+- Aim Pos
 ---
 ### WorkList
  (**Coming soon**)
-- Aimbot
-- Silent Aim
-
-(**Maybe**)
+- Embed Vac Bypass
 - Item ESP (If I can figure out why it doesn't work)
+- Trigger (Bruh Its broken and im too lazy to fix)
 
 ### Progress History:
 # Changelog
@@ -94,5 +102,9 @@ If you come up across this repo, and wanted features please make an issue. (I wi
 - Corrected weapon icons.
 - Fixed readme.md (Still ugly)
 
+### V 2.2
+- Updated Aimbot Features
+- Slient AimBot!!!!!!!!!!!!!!!!!!!!!!!!
+
 ### Current Progress
-![Current Progress](./imgs/VAC%20PASS.PNG)
+![Current Progress](./imgs/Slient-Aim.gif)
