@@ -9,6 +9,7 @@ namespace Settings
 		bool Bhop = false;
 		bool Radar = false;
 		bool NoFlash = false;
+		bool ThirdPerson = false;
 	}
 	namespace ESP
 	{
@@ -52,10 +53,14 @@ namespace Settings
 			"Right Foot"
 		};
 		bool Aimbot = false;
-		bool slient = false;
+		bool Slient = false;
+		bool Smooth = true;
+		float SmoothValue = 0.1f;
 		bool Team = false;
 		bool VisibilityCheck = false;
 		bool Trigger = false;
+		float TriggerDelay = 0;
+		float BetweenShotDelay = 0.01;
 		int SelectedItem = 2;
 		bool distance_angle_switch = false;
 		bool FOVCheck = true;

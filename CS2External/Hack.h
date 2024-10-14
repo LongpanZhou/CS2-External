@@ -10,4 +10,6 @@ namespace Hack
 	void Aimbot();
 	extern void PatchSlient();
 	extern void UnpatchSlient();
+	extern void PatchThird();
+	extern void UnpatchThird();
 }

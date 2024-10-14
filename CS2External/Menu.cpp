@@ -20,16 +20,13 @@ void Menu::Aimbot()
 	if (ImGui::BeginTabItem("Aimbot"))
 	{
 		ImGui::Checkbox("Aimbot", &Settings::Aimbot::Aimbot);
-        if (ImGui::Checkbox("Slient", &Settings::Aimbot::slient))
-        {
-            if (!Settings::Aimbot::slient)
-                Hack::UnpatchSlient();
-            else
-				Hack::PatchSlient();
-        }
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "R.I.P Slient Aim 10/13/2024");
+        if (ImGui::Checkbox("Slient", &Settings::Aimbot::Slient))
+                Settings::Aimbot::Slient = false;
+		ImGui::Checkbox("Smooth", &Settings::Aimbot::Smooth);
+		ImGui::SliderFloat("Smooth Value", &Settings::Aimbot::SmoothValue, 0.0f, 1.0f);
 		ImGui::Checkbox("Team", &Settings::Aimbot::Team);
 		ImGui::Checkbox("Visibility Check", &Settings::Aimbot::VisibilityCheck);
-		//ImGui::Checkbox("Trigger", &Settings::Aimbot::Trigger);
         if (ImGui::Checkbox("Closest Angle Enemy", &angleSelected))
         {
             Settings::Aimbot::distance_angle_switch = !angleSelected;
@@ -40,6 +37,9 @@ void Menu::Aimbot()
             Settings::Aimbot::distance_angle_switch = distanceSelected;
 			angleSelected = !distanceSelected;
         }
+		ImGui::Checkbox("Trigger", &Settings::Aimbot::Trigger);
+		ImGui::SliderFloat("Trigger Delay", &Settings::Aimbot::TriggerDelay, 0.0f, 1.0f);
+		ImGui::SliderFloat("Between Shot Delay", &Settings::Aimbot::BetweenShotDelay, 0.01f, 1.0f);
 		ImGui::Checkbox("FOV Check", &Settings::Aimbot::FOVCheck);
 		ImGui::SliderFloat("FOV", &Settings::Aimbot::FOV, 0.0f, 360.0f);
         ImGui::ListBox("Aim Position", &Settings::Aimbot::SelectedItem, Settings::Aimbot::items, IM_ARRAYSIZE(Settings::Aimbot::items));
@@ -66,6 +66,14 @@ void Menu::Utility()
         ImGui::Checkbox("Bhop", &Settings::Util::Bhop);
 		ImGui::Checkbox("Radar", &Settings::Util::Radar);
 		ImGui::Checkbox("NoFlash", &Settings::Util::NoFlash);
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Warning: Turn third person off before exiting cheat!");
+        if (ImGui::Checkbox("Third Person", &Settings::Util::ThirdPerson))
+        {
+            if (!Settings::Util::ThirdPerson)
+                Hack::UnpatchThird();
+            else
+                Hack::PatchThird();
+        }
         ImGui::EndTabItem();
     }
 }

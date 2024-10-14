@@ -16,11 +16,14 @@ auto mem = Mem(L"cs2.exe");
 auto baseAddress = mem.GetModuleAddress(L"client.dll");
 auto serverBaseAddress = mem.GetModuleAddress(L"server.dll");
 
-vec3 aimAngle;
-uintptr_t loadViewAngleFuncYaw = baseAddress + 0x896354;
-uintptr_t loadViewAngleFuncPitch = baseAddress + 0x89636D;
+vec3 aimAngle, PlayerPos, viewAngles;
+uintptr_t loadViewAngleFuncYaw = baseAddress + Offsets::loadViewAngleFuncYaw;
+uintptr_t loadViewAngleFuncPitch = baseAddress + Offsets::loadViewAngleFuncPitch;
 byte originalBytesYaw[10], patchedBytesYaw[10];
 byte originalBytesPitch[11], patchedBytesPitch[11];
+
+uintptr_t ThirdPerson = baseAddress + Offsets::CSGOInput::patchAddress;
+byte originalThirdPerson[8], patchedThirdPerson[8] = { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
 
 uintptr_t EntityList = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwEntityList);
 float LocalViewMatrix[16];
@@ -40,9 +43,14 @@ void Hack::Util()
 				std::this_thread::sleep_for(std::chrono::milliseconds(2));
 				mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 65537);
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
-				mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 256);
+				mem.WriteMemory<int>(baseAddress + Offsets::dwForceJump, 16777472);
 			}
 		}
+	}
+
+	if (Settings::Util::ThirdPerson)
+	{
+		mem.WriteMemory<Vec3>(baseAddress + Offsets::dwCSGOInput + Offsets::CSGOInput::dwViewAngles, { viewAngles.x, viewAngles.y, 150});
 	}
 }
 
@@ -92,7 +100,19 @@ void Hack::ESP()
 				continue;
 
 			if (Settings::ESP::Lines)
-				ImGui::GetForegroundDrawList()->AddLine(ImVec2(width / 2, height), ImVec2(wtsFeet.x, wtsFeet.y), ImColor(255, 255, 255, 255));
+			{
+				if (Settings::Util::ThirdPerson)
+				{
+					Vec3 PlayerFeetPos = mem.ReadMemory<Vec3>(localPlayerPtr + Offsets::LocalPlayer::m_vLastSlopeCheckPos);
+					Vec3 PlayerScreenPos;
+					T_WorldToScreen(PlayerFeetPos, PlayerScreenPos, LocalViewMatrix, width, height);
+					ImGui::GetForegroundDrawList()->AddLine({PlayerScreenPos.x, PlayerScreenPos.y}, { wtsHead.x, wtsHead.y }, ImColor(255, 255, 255));
+				}
+				else
+				{
+					ImGui::GetForegroundDrawList()->AddLine(ImVec2(width / 2, height), { wtsHead.x, wtsHead.y }, ImColor(255, 255, 255));
+				}
+			}
 
 			Vec4 ESPrect = CalcRect(wtsFeet, wtsHead);
 			if (Settings::ESP::Box)
@@ -346,14 +366,33 @@ void Hack::Misc()
 	}
 }
 
+extern void Hack::PatchThird()
+{
+	DWORD oldProtect;
+	VirtualProtect((LPVOID)ThirdPerson, 8, PAGE_EXECUTE_READWRITE, &oldProtect);
+	ReadProcessMemory(mem.GetProcessHandle(), (LPVOID)ThirdPerson, originalThirdPerson, sizeof(originalThirdPerson), nullptr);
+	WriteProcessMemory(mem.GetProcessHandle(), (LPVOID)ThirdPerson, patchedThirdPerson, sizeof(patchedThirdPerson), nullptr);
+	mem.WriteMemory<int>(baseAddress + Offsets::dwCSGOInput + Offsets::CSGOInput::dwCameraInThirdPerson, 256);
+	VirtualProtect((LPVOID)ThirdPerson, 8, oldProtect, &oldProtect);
+}
+
+extern void Hack::UnpatchThird()
+{
+	DWORD oldProtect;
+	VirtualProtect((LPVOID)ThirdPerson, 8, PAGE_EXECUTE_READWRITE, &oldProtect);
+	mem.WriteMemory<int>(baseAddress + Offsets::dwCSGOInput + Offsets::CSGOInput::dwCameraInThirdPerson, 0);
+	WriteProcessMemory(mem.GetProcessHandle(), (LPVOID)ThirdPerson, originalThirdPerson, sizeof(originalThirdPerson), nullptr);
+	VirtualProtect((LPVOID)ThirdPerson, 8, oldProtect, &oldProtect);
+}
+
 extern void Hack::PatchSlient()
 {
 	DWORD oldProtectYaw, oldProtectPitch;
 	VirtualProtect((LPVOID)loadViewAngleFuncYaw, 10, PAGE_EXECUTE_READWRITE, &oldProtectYaw);
 	VirtualProtect((LPVOID)loadViewAngleFuncPitch, 11, PAGE_EXECUTE_READWRITE, &oldProtectPitch);
 
-	// mov eax, x
-	// movd xmm0, eax
+	// mov ebx, x
+	// movd xmm0, ebx
 	patchedBytesYaw[0] = 0xBA;
 	memcpy(&patchedBytesYaw[1], &aimAngle.x, sizeof(float));
 	patchedBytesYaw[5] = 0x66;
@@ -362,8 +401,8 @@ extern void Hack::PatchSlient()
 	patchedBytesYaw[8] = 0xC2;
 	patchedBytesYaw[9] = 0x90;
 
-	// mov , y
-	// movd xmm1, eax
+	// mov ebx, y
+	// movd xmm1, ebx
 	patchedBytesPitch[0] = 0xBA;
 	memcpy(&patchedBytesPitch[1], &aimAngle.y, sizeof(float));
 	patchedBytesPitch[5] = 0x66;
@@ -418,23 +457,8 @@ void Hack::Aimbot()
 										{ 0, 0 }
 	};
 
-	if (Settings::Aimbot::Aimbot && Settings::Aimbot::Trigger)
+	if (Settings::Aimbot::Aimbot)
 	{
-		int crosshair_ent = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iIDEntIndex);
-
-		POINT p;
-		if (crosshair_ent && crosshair_ent != -1)
-		{
-			GetCursorPos(&p);
-			mouse_event(MOUSEEVENTF_LEFTDOWN, p.x, p.y, 0, 0);
-			mouse_event(MOUSEEVENTF_LEFTUP, p.x, p.y, 0, 0);
-		}
-	}
-
-	if (Settings::Aimbot::Aimbot && GetAsyncKeyState(VK_LSHIFT))
-	{
-		vec3 PlayerPos = mem.ReadMemory<vec3>(localPlayerPtr + Offsets::LocalPlayer::m_vecLastClipCameraPos);
-		vec3 viewAngles = mem.ReadMemory<vec3>(localPlayerPtr + Offsets::LocalPlayer::m_angEyeAngles);
 		uintptr_t ClosestDistanceEnemy, ClosestAngleEnemy;
 		float Closestdistance = 999999, Cloestangle = 999999;
 
@@ -486,13 +510,13 @@ void Hack::Aimbot()
 			}
 			 
 			vec3 targetAngle = CalcAngle(PlayerPos, enemyPos);
-			float xDiff = targetAngle.x - viewAngles.x;
-			if (xDiff > 180)
-				xDiff -= 360;
-			else if (xDiff < -180)
-				xDiff += 360;
+			float yDiff = targetAngle.y - viewAngles.y;
+			if (yDiff > 180)
+				yDiff -= 360;
+			else if (yDiff < -180)
+				yDiff += 360;
 
-			float yDiff = min(abs(viewAngles.y - targetAngle.y), abs(targetAngle.y - viewAngles.y));
+			float xDiff = min(abs(viewAngles.x - targetAngle.x), abs(targetAngle.x - viewAngles.x));
 
 			float angleMagnitude = sqrt(pow(xDiff, 2) + pow(yDiff, 2));
 			if (angleMagnitude < Cloestangle)
@@ -516,20 +540,53 @@ void Hack::Aimbot()
 		vec3 enemyBonePos = boneArray[boneindex[Settings::Aimbot::SelectedItem]].Pos;
 
 		aimAngle = CalcAngle(PlayerPos, enemyBonePos);
-		if (Settings::Aimbot::slient)
+		if (Settings::Aimbot::Slient)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			PatchSlient();
 		}
+		else if (Settings::Aimbot::Smooth && GetAsyncKeyState(VK_LSHIFT))
+		{
+			vec3 delta = aimAngle - viewAngles;
+
+			delta.y = aimAngle.y - viewAngles.y;
+			if (delta.y > 180)
+				delta.y -= 360;
+			else if (delta.y < -180)
+				delta.y += 360;
+
+			float xDiff = min(abs(aimAngle.x - viewAngles.x), abs(viewAngles.x - aimAngle.x));
+
+			vec3 smoothedAngle = viewAngles + delta*Settings::Aimbot::SmoothValue;
+			mem.WriteMemory<vec3>(baseAddress + Offsets::dwViewAngles, smoothedAngle);
+		}
 		else
-			mem.WriteMemory<Vec3>(baseAddress + Offsets::dwViewAngles, aimAngle);
+		{
+			if (GetAsyncKeyState(VK_LSHIFT))
+				mem.WriteMemory<Vec3>(baseAddress + Offsets::dwViewAngles, aimAngle);
+		}
+
+		if (Settings::Aimbot::Trigger)
+		{
+			int crosshair_ent = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iIDEntIndex);
+			std::this_thread::sleep_for(std::chrono::milliseconds((int)Settings::Aimbot::TriggerDelay * 1000));
+			if (Settings::Aimbot::Slient || (crosshair_ent && crosshair_ent != -1))
+			{
+				mem.WriteMemory<int>(baseAddress + Offsets::dwForceAttack, 1);
+				std::this_thread::sleep_for(std::chrono::milliseconds((int)Settings::Aimbot::BetweenShotDelay * 1000));
+				mem.WriteMemory<int>(baseAddress + Offsets::dwForceAttack, 0);
+			}
+		}
 	}
 }
 
+//Don't really understand how threading works, but it works :/
 void Hack::hackloop()
 {
 	localPlayerPtr = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwLocalPlayerPawn);
 	localplayer_team = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iTeamNum);
+	PlayerPos = mem.ReadMemory<vec3>(localPlayerPtr + Offsets::LocalPlayer::m_vecLastClipCameraPos);
+	viewAngles = mem.ReadMemory<vec3>(localPlayerPtr + Offsets::LocalPlayer::m_angEyeAngles);
 	mem.ReadMemory(baseAddress + Offsets::dwViewMatrix, LocalViewMatrix, 16);
 
 	std::thread utilThread(Hack::Util);

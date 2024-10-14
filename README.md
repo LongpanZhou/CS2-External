@@ -31,20 +31,34 @@ If you come up across this repo, and wanted features please make an issue. (I wi
 
 #### Utils:
 - Bhop
+- Radar
+- NoFlash
+- Third Person
 
 ### Misc
 - Item (Broken)
 - Glow
 - Bomb
-  
+
+### Aimbot
+- Aimbot
+- Slient (R.I.P)
+- Smooth
+- Team
+- Visibility Check
+- Closest Angle Enemy
+- CloSEST Distance Enemy
+- Trigger
+- FOV check
+- FOV range
+- Aim Pos
 ---
 ### WorkList
  (**Coming soon**)
-- Aimbot
-- Silent Aim
-
-(**Maybe**)
+- Embed Vac Bypass
 - Item ESP (If I can figure out why it doesn't work)
+- Signature Scanning for custom offsets
+- Anti-Aim (Might be hard for external)
 
 ### Progress History:
 # Changelog
@@ -94,5 +108,20 @@ If you come up across this repo, and wanted features please make an issue. (I wi
 - Corrected weapon icons.
 - Fixed readme.md (Still ugly)
 
+### V 2.2
+- Updated Aimbot Features
+- Slient AimBot!!!!!!!!!!!!!!!!!!!!!!!!
+
+### V 2.3
+AutoDrag Drop load offsets
+fixed find neareast angle enemy
+Smooth aimbot
+Better trigger bot - force attack, attack delay, between attack delay.
+Updated Third Person
+R.I.P slient Aim (Patched)
+
 ### Current Progress
-![Current Progress](./imgs/VAC%20PASS.PNG)
+![CurrentProgress](./imgs/current.png)
+
+### R.I.P silent aim (lived one patch)
+![Slient Aim](./imgs/Slient-Aim.gif)

@@ -10,6 +10,7 @@ namespace Settings
 		extern bool Bhop;
 		extern bool Radar;
 		extern bool NoFlash;
+		extern bool ThirdPerson;
 	}
 	namespace ESP
 	{
@@ -37,10 +38,14 @@ namespace Settings
 	{
 		extern const char* items[15];
 		extern bool Aimbot;
-		extern bool slient;
+		extern bool Slient;
+		extern bool Smooth;
+		extern float SmoothValue;
 		extern bool Team;
 		extern bool VisibilityCheck;
 		extern bool Trigger;
+		extern float TriggerDelay;
+		extern float BetweenShotDelay;
 		extern int SelectedItem;
 		extern bool distance_angle_switch;
 		extern bool FOVCheck;

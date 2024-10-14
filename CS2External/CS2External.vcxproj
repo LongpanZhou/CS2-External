@@ -154,6 +154,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bone.h" />
+    <ClInclude Include="cs2-dumper\client_dll.hpp" />
+    <ClInclude Include="cs2-dumper\offsets.hpp" />
     <ClInclude Include="Hack.h" />
     <ClInclude Include="Include\geom.h" />
     <ClInclude Include="Include\GLFW\glfw3.h" />
@@ -172,9 +174,6 @@
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Settings.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="weaponIcons.ttf" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Lib\glfw3.dll" />
