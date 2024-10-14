@@ -113,12 +113,12 @@ If you come up across this repo, and wanted features please make an issue. (I wi
 - Slient AimBot!!!!!!!!!!!!!!!!!!!!!!!!
 
 ### V 2.3
-AutoDrag Drop load offsets
-fixed find neareast angle enemy
-Smooth aimbot
-Better trigger bot - force attack, attack delay, between attack delay.
-Updated Third Person
-R.I.P slient Aim (Patched)
+- AutoDrag Drop load offsets
+- fixed find neareast angle enemy
+- Smooth aimbot
+- Better trigger bot - force attack, attack delay, between attack delay.
+- Updated Third Person
+- R.I.P slient Aim (Patched)
 
 ### Current Progress
 ![CurrentProgress](./imgs/current.png)
