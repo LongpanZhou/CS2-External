@@ -63,7 +63,11 @@ If you like this project, or find this project helpful please give me a star. Th
 
 ### Misc
 
-- Item ESP(Broken)
+- All Entity
+
+- Item
+
+- Chicken
 
 - Glow
 
