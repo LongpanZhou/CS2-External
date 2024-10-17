@@ -2,9 +2,22 @@
 #include <map>
 #include <string>
 
+template<typename MapType>
+int GetIndex(const MapType& map, const std::string& key, int defaultValue = 0) {
+    auto it = map.find(key);
+    return (it != map.end()) ? it->second : defaultValue;
+}
+
 static std::map<std::string, std::string> EntityType = {
     {"chicken", "Chicken"},
-    {"hostage_entity", "Hostage"}
+    {"hostage_entity", "Hostage"},
+    {"baseanimgraph", "Defuser"}
+};
+
+static std::map<std::string, int> EntityTypeInt = {
+    {"chicken", 1001},
+    {"hostage_entity", 1003},
+    {"baseanimgraph", 1002}
 };
 
 static std::map<std::string, std::string> ProjectilesType = {
@@ -14,6 +27,15 @@ static std::map<std::string, std::string> ProjectilesType = {
     {"molotov_projectile", "Molotov"},
     {"incendiarygrenade_projectile", "Incendiary Grenade"},
     {"decoy_projectile", "Decoy Grenade"}
+};
+
+static std::map<std::string, int> ProjectilesTypeInt = {
+    {"smokegrenade_projectile", 45},
+    {"flashbang_projectile", 43},
+    {"hegrenade_projectile", 44},
+    {"molotov_projectile", 46},
+    {"incendiarygrenade_projectile", 48},
+    {"decoy_projectile", 47}
 };
 
 static std::map<std::string, std::string> WeaponsType = {
@@ -59,7 +81,54 @@ static std::map<std::string, std::string> WeaponsType = {
     {"weapon_cz75a", "CZ75-Auto"},
     {"weapon_deagle", "Desert Eagle"},
     {"weapon_revolver", "R8 Revolver"},
-    {"weapon_glock", "Glock-18"}
+    {"weapon_glock", "Glock-18"},
+};
+
+static std::map<std::string, int> WeaponsTypeInt = {
+    {"weapon_ak47", 7},
+    {"weapon_m4a1", 16},
+    {"weapon_awp", 9},
+    {"weapon_elite", 2},
+    {"weapon_famas", 10},
+    {"weapon_flashbang", 43},
+    {"weapon_g3sg1", 11},
+    {"weapon_galilar", 13},
+    {"weapon_healthshot", 57},
+    {"weapon_hegrenade", 44},
+    {"weapon_incgrenade", 48},
+    {"weapon_m249", 14},
+    {"weapon_m4a1_silencer", 60},
+    {"weapon_mac10", 17},
+    {"weapon_mag7", 27},
+    {"weapon_molotov", 46},
+    {"weapon_mp5sd", 23},
+    {"weapon_mp7", 33},
+    {"weapon_mp9", 34},
+    {"weapon_negev", 28},
+    {"weapon_nova", 35},
+    {"weapon_p90", 19},
+    {"weapon_sawedoff", 29},
+    {"weapon_scar20", 38},
+    {"weapon_sg556", 39},
+    {"weapon_smokegrenade", 45},
+    {"weapon_ssg08", 40},
+    {"weapon_tagrenade", 48},
+    {"weapon_taser", 31},
+    {"weapon_ump45", 24},
+    {"weapon_xm1014", 25},
+    {"weapon_aug", 8},
+    {"weapon_bizon", 26},
+    {"weapon_decoy", 47},
+    {"weapon_fiveseven", 3},
+    {"weapon_hkp2000", 32},
+    {"weapon_usp_silencer", 61},
+    {"weapon_p250", 36},
+    {"weapon_tec9", 30},
+    {"weapon_cz75a", 63},
+    {"weapon_deagle", 1},
+    {"weapon_revolver", 64},
+    {"weapon_glock", 4},
+    {}
 };
 
 static std::map<int, std::string> Weapon = {
@@ -157,7 +226,7 @@ static std::map<int, std::string> Weapon = {
 
 static std::map<int, std::string> gunIcons = {
     {7, "W"},   // ak47
-    {16, "M"},  // m4a1
+    {16, "S"},  // m4a1
     {34, "R"},  // mp9
     {10, "H"},  // famas
     {24, "b"},  // ump45
@@ -181,12 +250,10 @@ static std::map<int, std::string> gunIcons = {
     {60, "T"},  // m4a1_silencer
     {8, "U"},   // aug
     {39, "V"},  // sg556
-    {7, "W"},   // ak47 (again for consistency)
     {11, "X"},  // g3sg1
     {38, "Y"},  // scar20
     {9, "Z"},   // awp
     {40, "a"},  // ssg08
-    {40, "a"},  // ssg-08 (duplicate for consistency)
     {25, "b"},  // xm1014
     {29, "c"},  // sawedoff
     {27, "d"},  // mag7
@@ -201,4 +268,8 @@ static std::map<int, std::string> gunIcons = {
     {47, "m"},  // decoy
     {48, "n"},  // incgrenade
     {49, "o"},  // c4
+	{57, "s"},  // healthshot
+    {1001, "w"},  // chiken
+    {1002, "r"}, //defuser
+    {23, "x"},  // mp5sd
 };

@@ -28,7 +28,9 @@ namespace Settings
 	
 	namespace Misc
 	{
+		bool AllEntity = false;
 		bool Item = true;
+		bool Chiken = true;
 		bool Glow = true;
 		bool Bomb = true;
 	}

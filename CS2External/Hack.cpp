@@ -9,7 +9,6 @@
 #include <ImGui/imgui.h>
 #include "bone.h"
 #include "weapon.hpp"
-#include <immintrin.h>
 
 //I remind you this is not the best optimized code, all the entity loop could have been put in the same loop and other etc...
 auto mem = Mem(L"cs2.exe");
@@ -32,6 +31,13 @@ int localplayer_team;
 
 void Hack::Util()
 {
+	if (Settings::Util::NoFlash)
+	{
+		float flashAlpha = mem.ReadMemory<float>(localPlayerPtr + Offsets::LocalPlayer::m_flFlashMaxAlpha);
+		if (flashAlpha > 0.0f)
+			mem.WriteMemory<float>(localPlayerPtr + Offsets::LocalPlayer::m_flFlashMaxAlpha, 0.0f);
+	}
+
 	if (Settings::Util::Bhop)
 	{
 		int state = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_fFlags);
@@ -244,73 +250,11 @@ void Hack::ESP()
 				}
 			}
 		}
-
-		//if (Settings::ESP::Item)
-		//{
-		//	for (int i = 65; i < 1024; i++)
-		//	{
-		//		uintptr_t listEntityController = mem.ReadMemory<uintptr_t>(EntityList + ((8 * (i & 0x7FFF) >> 9) + 16));
-		//		
-		//		if (!listEntityController)
-		//			continue;
-		//		uintptr_t entityController = mem.ReadMemory<uintptr_t>(listEntityController + 120 * (i & 0x1FF));
-
-		//		uintptr_t gamescene = mem.ReadMemory<uintptr_t>(entityController + Offsets::LocalPlayer::m_pGameSceneNode);
-		//		Vec3 EntityPos = mem.ReadMemory<Vec3>(gamescene + Offsets::GameSceneNode::m_vecOrigin);
-
-		//		uintptr_t itemInfo = mem.ReadMemory<uintptr_t>(gamescene + 0x10);
-		//		uintptr_t itemTypePtr = mem.ReadMemory<uintptr_t>(itemInfo + 0x20);
-
-		//		char nameBuffer[128];
-		//		mem.ReadMemory(itemTypePtr, nameBuffer, 128);
-
-		//		Vec3 ScreenPos;
-		//		if (T_WorldToScreen(EntityPos, ScreenPos, LocalViewMatrix, width, height))
-		//		{
-		//			ImGui::GetForegroundDrawList()->AddText({ ScreenPos.x, ScreenPos.y }, ImColor(255, 255, 255), nameBuffer);
-		//		}
-
-		//		//std::string Weapons;
-		//		//auto itWeapons = WeaponsType.find(nameBuffer);
-		//		//if (itWeapons != WeaponsType.end()) {
-		//		//	Weapons = itWeapons->second;
-		//		//}
-		//		//else {
-		//		//	Weapons = "Unknown";
-		//		//}
-
-		//		//std::string Projectiles;
-		//		//auto itProjectiles = ProjectilesType.find(nameBuffer);
-		//		//if (itProjectiles != ProjectilesType.end()) {
-		//		//	Projectiles = itProjectiles->second;
-		//		//}
-		//		//else {
-		//		//	Projectiles = "Unknown";
-		//		//}
-
-
-		//		//auto itEntityType = EntityType.find(nameBuffer);
-		//		//std::string Entity;
-		//		//if (itEntityType != EntityType.end()) {
-		//		//	Entity = itEntityType->second;
-		//		//}
-		//		//else {
-		//		//	Entity = "Unknown";
-		//		//}
-		//	}
-		//}
 	}
 }
 
 void Hack::Misc()
 {
-	if (Settings::Util::NoFlash)
-	{
-		float flashAlpha = mem.ReadMemory<float>(localPlayerPtr + Offsets::LocalPlayer::m_flFlashMaxAlpha);
-		if (flashAlpha > 0.0f)
-			mem.WriteMemory<float>(localPlayerPtr + Offsets::LocalPlayer::m_flFlashMaxAlpha, 0.0f);
-	}
-
 	if (Settings::Misc::Bomb)
 	{
 		uintptr_t entity = mem.ReadMemory<uintptr_t>(mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwWeaponC4));
@@ -331,7 +275,7 @@ void Hack::Misc()
 		}
 	}
 
-	if (Settings::Misc::Glow)
+	if (Settings::Misc::Glow )
 	{
 		for (int i = 1; i < 64; i++)
 		{
@@ -361,6 +305,56 @@ void Hack::Misc()
 				mem.WriteMemory<int>(entity + Offsets::C_BaseModelEntity::m_Glow + Offsets::CGlowProperty::m_bGlowing, 1);
 				mem.WriteMemory<int>(entity + Offsets::C_BaseModelEntity::m_Glow + Offsets::CGlowProperty::m_iGlowType, 3);
 				mem.WriteMemory<DWORD>(entity + Offsets::C_BaseModelEntity::m_Glow + Offsets::CGlowProperty::m_glowColorOverride, 0xFFFF0000);
+			}
+		}
+	}
+
+	if (Settings::Misc::Item || Settings::Misc::AllEntity)
+	{
+		for (int i = 65; i < 1024; i++)
+		{
+			uintptr_t listEntityController = mem.ReadMemory<uintptr_t>(EntityList + (i < 512 ? 0x10 : 0x18));
+			uintptr_t entityController = mem.ReadMemory<uintptr_t>(listEntityController + (120) * (i & 0x1FF));
+			if (!entityController)
+				continue;
+
+			uintptr_t gamescene = mem.ReadMemory<uintptr_t>(entityController + Offsets::LocalPlayer::m_pGameSceneNode);
+			if (!gamescene)
+				continue;
+
+			uintptr_t entityIdentity = mem.ReadMemory<uintptr_t>(entityController + 0x10);
+			uintptr_t entityNamePtr = mem.ReadMemory<uintptr_t>(entityIdentity + 0x20);
+
+			char entityNameBuffer[64]{};
+			mem.ReadMemory(entityNamePtr, entityNameBuffer, 64);
+			std::string entityName(entityNameBuffer);
+
+			Vec3 EntityPos = mem.ReadMemory<Vec3>(gamescene + Offsets::GameSceneNode::m_vecOrigin);
+			Vec3 ScreenPos;
+
+			if ((EntityPos.x != 0 || EntityPos.y != 0 || EntityPos.z != 0) && (entityName.contains("weapon") || entityName.contains("projectile")) || entityName.contains("baseanimgraph") || (Settings::Misc::Chiken && entityName.contains("chicken")))
+			{
+				ImGuiIO& io = ImGui::GetIO();
+				ImFont* weapon_font = io.Fonts->Fonts[1];
+				ImGui::PushFont(weapon_font);
+
+				int EntityIdx = GetIndex(EntityTypeInt, entityName);
+				int WeaponIdx = GetIndex(WeaponsTypeInt, entityName);
+				int ProjectileIdx = GetIndex(ProjectilesTypeInt, entityName);
+
+				int idx = EntityIdx | WeaponIdx | ProjectileIdx;
+
+				if (T_WorldToScreen(EntityPos, ScreenPos, LocalViewMatrix, width, height))
+				{
+					ImGui::GetForegroundDrawList()->AddText({ ScreenPos.x, ScreenPos.y }, ImColor(255, 255, 255), gunIcons[idx].c_str());
+				}
+				ImGui::PopFont();
+			}else if (Settings::Misc::AllEntity && (EntityPos.x != 0 || EntityPos.y != 0 || EntityPos.z != 0))
+			{
+				if (T_WorldToScreen(EntityPos, ScreenPos, LocalViewMatrix, width, height))
+				{
+					ImGui::GetForegroundDrawList()->AddText({ ScreenPos.x, ScreenPos.y }, ImColor(255, 255, 255), entityNameBuffer);
+				}
 			}
 		}
 	}

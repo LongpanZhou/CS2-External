@@ -29,7 +29,9 @@ namespace Settings
 
 	namespace Misc
 	{
+		extern bool AllEntity;
 		extern bool Item;
+		extern bool Chiken;
 		extern bool Bomb;
 		extern bool Glow;
 	}

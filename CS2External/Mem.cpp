@@ -3,7 +3,7 @@
 
 Mem::Mem(const wchar_t* processName)
 {
-PROCESSENTRY32 entry;
+	PROCESSENTRY32 entry;
 	entry.dwSize = sizeof(PROCESSENTRY32);
 
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
