@@ -1,25 +1,18 @@
-
 # CS2 External
 
-  
-
 **_This project is currently under development._**
+
 If you like this project, or find this project helpful please give me a star. Thank you!
 
 > [!IMPORTANT]
-
 > If you only wish to use this cheat, please refer to [release](https://github.com/LongpanZhou/CS2-External/releases).
 
   
 
 > [!WARNING]
-
 > You need to run Vac Bypass with the exteranl cheat. You will get banned otherwise!
-
 >  1. Run VacBypass Loader
-
 >  2. Run Cheat
-
 >  3. Enjoy
 
   
