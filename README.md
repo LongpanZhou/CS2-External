@@ -18,9 +18,7 @@ If you like this project, or find this project helpful please give me a star. Th
   
 
 > [!NOTE]
-
 > If you have any features/bugs you wish to report, please leave under [issues](https://github.com/LongpanZhou/CS2-External/issues) page, I will try my best to implement/fix them. <br/>
-
 > VAC bypass loader can be found on [github](https://github.com/danielkrupinski/VAC-Bypass-Loader) or [release](https://github.com/LongpanZhou/CS2-External/releases).
 
 ---
