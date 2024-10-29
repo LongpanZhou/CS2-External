@@ -54,6 +54,26 @@ uintptr_t Mem::GetModuleAddress(const wchar_t* moduleName)
 	return 0;
 }
 
+HMODULE Mem::GetModuleHandleW(const wchar_t* moduleName)
+{
+	MODULEENTRY32 entry;
+	entry.dwSize = sizeof(MODULEENTRY32);
+
+	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, processID);
+
+	if (snapshot == INVALID_HANDLE_VALUE)
+		return 0;
+
+	while (Module32Next(snapshot, &entry))
+		if (!_wcsicmp(entry.szModule, moduleName))
+		{
+			CloseHandle(snapshot);
+			return entry.hModule;
+		}
+	CloseHandle(snapshot);
+	return 0;
+}
+
 Mem::~Mem()
 {
 	if (this->processHandle)

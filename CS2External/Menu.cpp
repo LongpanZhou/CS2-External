@@ -3,6 +3,18 @@
 #include <ImGui/imgui.h>
 #include <GLFW/glfw3.h>
 #include "Hack.h"
+#include <Windows.h>
+
+bool isListeningForKey = false;
+
+int GetPressedKey() {
+    for (int key = 0x01; key < 0xFE; key++) {
+        if (GetAsyncKeyState(key) & 0x8000) {
+            return key;
+        }
+    }
+    return 0;
+}
 
 void Menu::ToggleMenu()
 {
@@ -20,6 +32,17 @@ void Menu::Aimbot()
 	if (ImGui::BeginTabItem("Aimbot"))
 	{
 		ImGui::Checkbox("Aimbot", &Settings::Aimbot::Aimbot);
+        ImGui::Text(isListeningForKey ? "Listening for Key..." : "AimKey: %d", Settings::Aimbot::Key);
+		if (ImGui::Button("Change Aimbot Key"))
+            isListeningForKey = true;
+        if (isListeningForKey) {
+            int pressedKey = GetPressedKey();
+            if (pressedKey != 0) {
+                Settings::Aimbot::Key = pressedKey;
+                isListeningForKey = false;
+            }
+        }
+		ImGui::Checkbox("RCS", &Settings::Aimbot::RCS);
         ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "R.I.P Slient Aim 10/13/2024");
         if (ImGui::Checkbox("Slient", &Settings::Aimbot::Slient))
                 Settings::Aimbot::Slient = false;
@@ -39,7 +62,6 @@ void Menu::Aimbot()
         }
 		ImGui::Checkbox("Trigger", &Settings::Aimbot::Trigger);
 		ImGui::SliderFloat("Trigger Delay", &Settings::Aimbot::TriggerDelay, 0.0f, 1.0f);
-		ImGui::SliderFloat("Between Shot Delay", &Settings::Aimbot::BetweenShotDelay, 0.01f, 1.0f);
 		ImGui::Checkbox("FOV Check", &Settings::Aimbot::FOVCheck);
 		ImGui::SliderFloat("FOV", &Settings::Aimbot::FOV, 0.0f, 360.0f);
         ImGui::ListBox("Aim Position", &Settings::Aimbot::SelectedItem, Settings::Aimbot::items, IM_ARRAYSIZE(Settings::Aimbot::items));
@@ -102,7 +124,7 @@ void Menu::MainMenu()
     if (Settings::showMenu)
     {
         ImGui::Begin("Menu", &Settings::showMenu, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::SetWindowSize(ImVec2(500, 500));
+        ImGui::SetWindowSize(ImVec2(500, 600));
 
         if (ImGui::BeginTabBar("Tab bar"))
         {

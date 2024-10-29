@@ -1,43 +1,30 @@
-
 # CS2 External
 
-  
-
 **_This project is currently under development._**
+
 If you like this project, or find this project helpful please give me a star. Thank you!
 
 > [!IMPORTANT]
-
 > If you only wish to use this cheat, please refer to [release](https://github.com/LongpanZhou/CS2-External/releases).
 
   
 
 > [!WARNING]
-
 > You need to run Vac Bypass with the exteranl cheat. You will get banned otherwise!
-
 >  1. Run VacBypass Loader
-
 >  2. Run Cheat
-
 >  3. Enjoy
 
-  
-
 > [!NOTE]
-
 > If you have any features/bugs you wish to report, please leave under [issues](https://github.com/LongpanZhou/CS2-External/issues) page, I will try my best to implement/fix them. <br/>
-
 > VAC bypass loader can be found on [github](https://github.com/danielkrupinski/VAC-Bypass-Loader) or [release](https://github.com/LongpanZhou/CS2-External/releases).
 
 ---
 
 ### Features:
 
-  
-
 #### ESP:
-
+![ESP](./imgs/ESP.PNG)
 - ESP
 
 - Team
@@ -54,9 +41,18 @@ If you like this project, or find this project helpful please give me a star. Th
 
 - Vision Projection
 
-  
+### Misc
+![MISC](./imgs/MISC.PNG)
+- All Entity
 
-#### Utils:
+- Item
+
+- Glow
+
+- Bomb
+
+### Utils:
+![Utils](./imgs/Utility.PNG)
 
 - Bhop
 
@@ -66,21 +62,12 @@ If you like this project, or find this project helpful please give me a star. Th
 
 - Third Person
 
-  
-
-### Misc
-
-- Item ESP(Broken)
-
-- Glow
-
-- Bomb
-
-  
-
 ### Aimbot
+![Aimbot](./imgs/Aimbot.PNG)
 
 - Aimbot
+
+- Change Aimbot Key
 
 - Slient (R.I.P)
 
@@ -98,9 +85,7 @@ If you like this project, or find this project helpful please give me a star. Th
 
 - FOV check
 
-- FOV range
-
-- Aim Pos
+- Aim Position
 
 ---
 
@@ -108,19 +93,13 @@ If you like this project, or find this project helpful please give me a star. Th
 
 (**Coming soon**)
 
-- Embed Vac Bypass
-
-- Signature Scanning for custom offsets
-
-- Anti-Aim (Might be hard for external)
+- Embed Vac Bypass (Currently using VAC Bypass Loader)
 
   
 
 ### Progress History:
 
 # Changelog
-
-  
 
 ### V 1.0
 
@@ -216,7 +195,7 @@ If you like this project, or find this project helpful please give me a star. Th
 
 - Updated Aimbot Features
 
-- Slient AimBot!!!!!!!!!!!!!!!!!!!!!!!!
+- Slient AimBot
 
   
 
@@ -235,14 +214,28 @@ If you like this project, or find this project helpful please give me a star. Th
 - R.I.P slient Aim (Patched)
 
 ###  V 2.4
- - Fixed Item ESP
- - Added all entity ESP
- - Modified weapon.hpp icons
- - Custom offsets broken (game update)  will fix in signature scanning.
+- Fixed Item ESP
+
+- Added all entity ESP
+
+- Modified weapon.hpp icons
+
+- Custom offsets broken (game update)  will fix in signature scanning.
+
+
+### V 2.5
+
+- Auto update signature scanning
+
+- Updated offsets for forcejump and forceattack
+
+- Fixed trigger bot
+
+- Added Recoil Control System (Aimbot as well)
 
 ### Current Progress
 
-![CurrentProgress](./imgs/current.png)
+![CurrentProgress](./imgs/current.gif)
 
   
 

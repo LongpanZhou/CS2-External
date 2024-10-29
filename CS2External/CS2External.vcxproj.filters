@@ -107,7 +107,7 @@
     <ClInclude Include="Hack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Offsets.h">
+    <ClInclude Include="Offsets.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bone.h">
@@ -120,6 +120,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cs2-dumper\offsets.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Signature\Signature_external.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cs2-dumper\buttons.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

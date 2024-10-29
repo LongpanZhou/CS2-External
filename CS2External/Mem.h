@@ -20,6 +20,8 @@ public:
 
 	uintptr_t GetModuleAddress(const wchar_t* moduleName);
 
+	HMODULE GetModuleHandleW(const wchar_t* moduleName);
+
 	bool InForeground();
 
 	template <typename T>

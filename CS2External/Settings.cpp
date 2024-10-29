@@ -55,6 +55,8 @@ namespace Settings
 			"Right Foot"
 		};
 		bool Aimbot = false;
+		int Key = 0xA0;
+		bool RCS = false;
 		bool Slient = false;
 		bool Smooth = true;
 		float SmoothValue = 0.1f;
@@ -67,6 +69,5 @@ namespace Settings
 		bool distance_angle_switch = false;
 		bool FOVCheck = true;
 		float FOV = 180.0f;
-		int AimKey = 0xA0;
 	}
 }

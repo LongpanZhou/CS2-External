@@ -86,6 +86,7 @@ void GLFW_ImGuiInit()
 
 void renderLoop()
 {
+
 	while (!glfwWindowShouldClose(glfwGetCurrentContext()))
 	{
 		if (GetAsyncKeyState(VK_DELETE))

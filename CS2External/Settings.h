@@ -39,7 +39,9 @@ namespace Settings
 	namespace Aimbot
 	{
 		extern const char* items[15];
+		extern int Key;
 		extern bool Aimbot;
+		extern bool RCS;
 		extern bool Slient;
 		extern bool Smooth;
 		extern float SmoothValue;
@@ -52,6 +54,5 @@ namespace Settings
 		extern bool distance_angle_switch;
 		extern bool FOVCheck;
 		extern float FOV;
-		extern int AimKey;
 	}
 }

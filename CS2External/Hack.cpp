@@ -1,19 +1,22 @@
 #include "Hack.h"
 #include <geom.h>
 #include "Settings.h"
-#include "Offsets.h"
-#include <Windows.h>
+#include "Offsets.hpp"
 #include "Mem.h"
 #include <thread>
 #include <iostream>
 #include <ImGui/imgui.h>
 #include "bone.h"
 #include "weapon.hpp"
+#include <algorithm>
 
 //I remind you this is not the best optimized code, all the entity loop could have been put in the same loop and other etc...
 auto mem = Mem(L"cs2.exe");
 auto baseAddress = mem.GetModuleAddress(L"client.dll");
 auto serverBaseAddress = mem.GetModuleAddress(L"server.dll");
+HANDLE hProcess = mem.GetProcessHandle();
+HMODULE hModule = mem.GetModuleHandleW(L"client.dll");
+BOOL init = false;
 
 vec3 aimAngle, PlayerPos, viewAngles;
 uintptr_t loadViewAngleFuncYaw = baseAddress + Offsets::loadViewAngleFuncYaw;
@@ -21,7 +24,6 @@ uintptr_t loadViewAngleFuncPitch = baseAddress + Offsets::loadViewAngleFuncPitch
 byte originalBytesYaw[10], patchedBytesYaw[10];
 byte originalBytesPitch[11], patchedBytesPitch[11];
 
-uintptr_t ThirdPerson = baseAddress + Offsets::CSGOInput::patchAddress;
 byte originalThirdPerson[8], patchedThirdPerson[8] = { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
 
 uintptr_t EntityList = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwEntityList);
@@ -363,20 +365,20 @@ void Hack::Misc()
 extern void Hack::PatchThird()
 {
 	DWORD oldProtect;
-	VirtualProtect((LPVOID)ThirdPerson, 8, PAGE_EXECUTE_READWRITE, &oldProtect);
-	ReadProcessMemory(mem.GetProcessHandle(), (LPVOID)ThirdPerson, originalThirdPerson, sizeof(originalThirdPerson), nullptr);
-	WriteProcessMemory(mem.GetProcessHandle(), (LPVOID)ThirdPerson, patchedThirdPerson, sizeof(patchedThirdPerson), nullptr);
+	VirtualProtect((LPVOID)Offsets::ThirdPersonPatchAddress, 8, PAGE_EXECUTE_READWRITE, &oldProtect);
+	ReadProcessMemory(mem.GetProcessHandle(), (LPVOID)Offsets::ThirdPersonPatchAddress, originalThirdPerson, sizeof(originalThirdPerson), nullptr);
+	WriteProcessMemory(mem.GetProcessHandle(), (LPVOID)Offsets::ThirdPersonPatchAddress, patchedThirdPerson, sizeof(patchedThirdPerson), nullptr);
 	mem.WriteMemory<int>(baseAddress + Offsets::dwCSGOInput + Offsets::CSGOInput::dwCameraInThirdPerson, 256);
-	VirtualProtect((LPVOID)ThirdPerson, 8, oldProtect, &oldProtect);
+	VirtualProtect((LPVOID)Offsets::ThirdPersonPatchAddress, 8, oldProtect, &oldProtect);
 }
 
 extern void Hack::UnpatchThird()
 {
 	DWORD oldProtect;
-	VirtualProtect((LPVOID)ThirdPerson, 8, PAGE_EXECUTE_READWRITE, &oldProtect);
+	VirtualProtect((LPVOID)Offsets::ThirdPersonPatchAddress, 8, PAGE_EXECUTE_READWRITE, &oldProtect);
 	mem.WriteMemory<int>(baseAddress + Offsets::dwCSGOInput + Offsets::CSGOInput::dwCameraInThirdPerson, 0);
-	WriteProcessMemory(mem.GetProcessHandle(), (LPVOID)ThirdPerson, originalThirdPerson, sizeof(originalThirdPerson), nullptr);
-	VirtualProtect((LPVOID)ThirdPerson, 8, oldProtect, &oldProtect);
+	WriteProcessMemory(mem.GetProcessHandle(), (LPVOID)Offsets::ThirdPersonPatchAddress, originalThirdPerson, sizeof(originalThirdPerson), nullptr);
+	VirtualProtect((LPVOID)Offsets::ThirdPersonPatchAddress, 8, oldProtect, &oldProtect);
 }
 
 extern void Hack::PatchSlient()
@@ -385,8 +387,8 @@ extern void Hack::PatchSlient()
 	VirtualProtect((LPVOID)loadViewAngleFuncYaw, 10, PAGE_EXECUTE_READWRITE, &oldProtectYaw);
 	VirtualProtect((LPVOID)loadViewAngleFuncPitch, 11, PAGE_EXECUTE_READWRITE, &oldProtectPitch);
 
-	// mov ebx, x
-	// movd xmm0, ebx
+	// mov edx, x
+	// movd xmm0, edx
 	patchedBytesYaw[0] = 0xBA;
 	memcpy(&patchedBytesYaw[1], &aimAngle.x, sizeof(float));
 	patchedBytesYaw[5] = 0x66;
@@ -395,8 +397,8 @@ extern void Hack::PatchSlient()
 	patchedBytesYaw[8] = 0xC2;
 	patchedBytesYaw[9] = 0x90;
 
-	// mov ebx, y
-	// movd xmm1, ebx
+	// mov edx, y
+	// movd xmm1, edx
 	patchedBytesPitch[0] = 0xBA;
 	memcpy(&patchedBytesPitch[1], &aimAngle.y, sizeof(float));
 	patchedBytesPitch[5] = 0x66;
@@ -450,6 +452,35 @@ void Hack::Aimbot()
 										{ 1, 5 },
 										{ 0, 0 }
 	};
+
+	if (Settings::Aimbot::RCS && !GetAsyncKeyState(Settings::Aimbot::Key))
+	{
+		static Vec3 oldPunchAngle = { 0, 0, 0 };
+		bool shotsFired = mem.ReadMemory<bool>(baseAddress + Offsets::dwForceAttack);
+
+		if (shotsFired)
+		{
+			Vec3 punchAngle = mem.ReadMemory<Vec3>(localPlayerPtr + Offsets::LocalPlayer::m_aimPunchAngle);
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+
+			if (oldPunchAngle.x != 0 && oldPunchAngle.y != 0)
+			{
+				Vec3 targetAngle = viewAngles + (oldPunchAngle - punchAngle * 2.0f);
+
+				targetAngle.x = std::clamp(targetAngle.x, -89.0f, 89.0f);
+				targetAngle.y = std::clamp(targetAngle.y, -180.0f, 180.0f);
+
+				mem.WriteMemory<Vec3>(baseAddress + Offsets::dwViewAngles, targetAngle);
+			}
+
+			oldPunchAngle = punchAngle * 2.0f;
+		}
+		else
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			oldPunchAngle = { 0, 0, 0 };
+		}
+	}
 
 	if (Settings::Aimbot::Aimbot)
 	{
@@ -534,12 +565,19 @@ void Hack::Aimbot()
 		vec3 enemyBonePos = boneArray[boneindex[Settings::Aimbot::SelectedItem]].Pos;
 
 		aimAngle = CalcAngle(PlayerPos, enemyBonePos);
+		
+		if (Settings::Aimbot::RCS)
+		{
+			Vec3 punchAngle = mem.ReadMemory<Vec3>(localPlayerPtr + Offsets::LocalPlayer::m_aimPunchAngle);
+			aimAngle -= punchAngle * 2.0f;
+		}
+
 		if (Settings::Aimbot::Slient)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			PatchSlient();
 		}
-		else if (Settings::Aimbot::Smooth && GetAsyncKeyState(VK_LSHIFT))
+		else if (Settings::Aimbot::Smooth && GetAsyncKeyState(Settings::Aimbot::Key))
 		{
 			vec3 delta = aimAngle - viewAngles;
 
@@ -556,19 +594,35 @@ void Hack::Aimbot()
 		}
 		else
 		{
-			if (GetAsyncKeyState(VK_LSHIFT))
+			if (GetAsyncKeyState(Settings::Aimbot::Key))
 				mem.WriteMemory<Vec3>(baseAddress + Offsets::dwViewAngles, aimAngle);
 		}
 
 		if (Settings::Aimbot::Trigger)
 		{
 			int crosshair_ent = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iIDEntIndex);
-			std::this_thread::sleep_for(std::chrono::milliseconds((int)Settings::Aimbot::TriggerDelay * 1000));
-			if (Settings::Aimbot::Slient || (crosshair_ent && crosshair_ent != -1))
+			bool attack = mem.ReadMemory<bool>(baseAddress + Offsets::dwForceAttack);
+			std::this_thread::sleep_for(std::chrono::milliseconds((int)(Settings::Aimbot::TriggerDelay * 1000)));
+
+			if (crosshair_ent && crosshair_ent != -1 && Settings::Aimbot::Team)
 			{
-				mem.WriteMemory<int>(baseAddress + Offsets::dwForceAttack, 1);
-				std::this_thread::sleep_for(std::chrono::milliseconds((int)Settings::Aimbot::BetweenShotDelay * 1000));
-				mem.WriteMemory<int>(baseAddress + Offsets::dwForceAttack, 0);
+				uintptr_t listEntityController = mem.ReadMemory<uintptr_t>(EntityList + (8 * (crosshair_ent >> 9) + 16));
+				uintptr_t entityController = mem.ReadMemory<uintptr_t>(listEntityController + (120) * (crosshair_ent & 0x1FF));
+
+				int entity_team = mem.ReadMemory<int>(entityController + Offsets::LocalPlayer::m_iTeamNum);
+
+
+				if (entity_team != localplayer_team || attack)
+					mem.WriteMemory<int>(baseAddress + Offsets::dwForceAttack + 2, 1);
+				else
+					mem.WriteMemory<int>(baseAddress + Offsets::dwForceAttack + 2, 0);
+			}
+			else
+			{
+				if ((crosshair_ent && crosshair_ent != -1) || attack)
+					mem.WriteMemory<int>(baseAddress + Offsets::dwForceAttack + 2, 1);
+				else
+					mem.WriteMemory<int>(baseAddress + Offsets::dwForceAttack + 2, 0);
 			}
 		}
 	}
@@ -577,6 +631,12 @@ void Hack::Aimbot()
 //Don't really understand how threading works, but it works :/
 void Hack::hackloop()
 {
+	if (!init)
+	{
+		initAddress(hProcess, hModule);
+		init = true;
+	}
+
 	localPlayerPtr = mem.ReadMemory<uintptr_t>(baseAddress + Offsets::dwLocalPlayerPawn);
 	localplayer_team = mem.ReadMemory<int>(localPlayerPtr + Offsets::LocalPlayer::m_iTeamNum);
 	PlayerPos = mem.ReadMemory<vec3>(localPlayerPtr + Offsets::LocalPlayer::m_vecLastClipCameraPos);
